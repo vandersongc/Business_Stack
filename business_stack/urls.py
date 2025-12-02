@@ -16,7 +16,25 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from . import views  # Importa as views que acabamos de criar
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    
+    # Página Inicial
+    path('', views.home, name='home'),
+
+    # Rotas dos Módulos (Cards)
+    path('administrador/', views.administrador, name='administrador'),
+    path('auditoria/', views.auditoria, name='auditoria'),
+    path('contabilidade/', views.contabilidade, name='contabilidade'),
+    path('financeiro/', views.financeiro, name='financeiro'),
+    path('logistica/', views.logistica, name='logistica'),
+    path('pessoal/', views.pessoal, name='pessoal'),
+    path('suprimentos/', views.suprimentos, name='suprimentos'),
+
+    # Rotas do Menu Superior
+    path('contato/', views.contato, name='contato'),
+    path('configuracoes/', views.configuracoes, name='configuracoes'),
+    path('logout/', views.logout_view, name='logout'),
 ]
