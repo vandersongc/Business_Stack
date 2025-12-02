@@ -1,8 +1,9 @@
 # business_stack/views.py
 from django.shortcuts import render
 
+
 def home(request):
-    return render(request, 'index.html')
+    return render(request, 'home.html')
 
 # Views temporárias para os botões não darem erro
 def administrador(request):
