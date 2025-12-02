@@ -1,0 +1,16 @@
+# Python e Venv
+__pycache__/
+*.pyc
+.venv/
+venv/
+env/
+
+# Django
+db.sqlite3
+media/
+
+# Variáveis de ambiente (Senhas)
+.env
+
+# Sistema Operacional
+.DS_Store
