@@ -14,27 +14,29 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+# business_stack/urls.py
 from django.contrib import admin
 from django.urls import path
-from . import views  # Importa as views que acabamos de criar
+from home import views as home_views  # Importando da app home
+from . import views as temp_views     # Importando as views temporárias (se ainda as usar)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     
-    # Página Inicial
-    path('', views.home, name='home'),
+    # Rota da Página Inicial (Apontando para a app home)
+    path('', home_views.home, name='home'),
 
-    # Rotas dos Módulos (Cards)
-    path('administrador/', views.administrador, name='administrador'),
-    path('auditoria/', views.auditoria, name='auditoria'),
-    path('contabilidade/', views.contabilidade, name='contabilidade'),
-    path('financeiro/', views.financeiro, name='financeiro'),
-    path('logistica/', views.logistica, name='logistica'),
-    path('pessoal/', views.pessoal, name='pessoal'),
-    path('suprimentos/', views.suprimentos, name='suprimentos'),
+    # Rotas dos Módulos (Se ainda não tiver views específicas nas outras apps, pode manter as temporárias)
+    path('administrador/', temp_views.administrador, name='administrador'),
+    path('auditoria/', temp_views.auditoria, name='auditoria'),
+    path('contabilidade/', temp_views.contabilidade, name='contabilidade'),
+    path('financeiro/', temp_views.financeiro, name='financeiro'),
+    path('logistica/', temp_views.logistica, name='logistica'),
+    path('pessoal/', temp_views.pessoal, name='pessoal'),
+    path('suprimentos/', temp_views.suprimentos, name='suprimentos'),
 
-    # Rotas do Menu Superior
-    path('contato/', views.contato, name='contato'),
-    path('configuracoes/', views.configuracoes, name='configuracoes'),
-    path('logout/', views.logout_view, name='logout'),
+    # Menus
+    path('contato/', temp_views.contato, name='contato'),
+    path('configuracoes/', temp_views.configuracoes, name='configuracoes'),
+    path('logout/', temp_views.logout_view, name='logout'),
 ]
