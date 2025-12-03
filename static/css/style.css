@@ -1,79 +1,47 @@
-/* --- Modern Dashboard Styles --- */
+/* ... Mantenha o conteúdo anterior do seu CSS ... */
 
-/* Títulos mais elegantes */
-.page-title {
-    font-weight: 700;
-    color: #2c3e50;
-    letter-spacing: -0.02em;
-    text-shadow: 0 1px 1px rgba(255,255,255,0.8);
+/* --- CORES E ESTILOS DO ELO STACK (ADICIONADO) --- */
+:root {
+    --bg-nav: #1e293b;              /* Cor de fundo clara (Elo Stack) */
+    --text-heading: rgb(202, 199, 199);        /* Cor do texto escuro */
+    --text-main:rgb(202, 199, 199);           /* Cor do texto principal */
+    --primary-green: rgb(202, 199, 199);       /* Verde destaque Elo Stack */
 }
 
-.text-muted {
-    color: #6c757d !important;
-    font-weight: 400;
+/* Navbar Personalizada (Estilo Elo Stack) */
+.navbar-custom {
+    background-color: #1e293b; /* Fundo claro com transparência */
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+    border-bottom: 1px solid rgba(0,0,0,0.03);
+    transition: all 0.3s ease;
 }
 
-/* Estilo do Card Moderno */
-.hover-card {
-    background: rgba(255, 255, 255, 0.9); /* Fundo branco com leve transparência */
-    backdrop-filter: blur(10px); /* Efeito de desfoque no fundo (Glassmorphism) */
-    border: 1px solid rgba(255, 255, 255, 0.6);
-    border-radius: 20px; /* Bordas bem arredondadas */
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.04); /* Sombra inicial sutil */
-    transition: all 0.35s cubic-bezier(0.25, 0.8, 0.25, 1); /* Transição suave e elástica */
-    overflow: hidden;
-    position: relative;
+/* Links da Navbar */
+.navbar-custom .nav-link {
+    color: var(--text-heading) !important;
+    font-weight: 500;
+    transition: color 0.3s;
 }
 
-/* Efeito de Hover no Card */
-.hover-card:hover {
-    transform: translateY(-8px) scale(1.02); /* Levanta e cresce levemente */
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12); /* Sombra profunda e difusa */
-    border-color: rgba(134, 135, 136, 0.3); /* Borda azul sutil */
-    background: #ffffff;
+.navbar-custom .nav-link:hover, 
+.navbar-custom .nav-link.active {
+    color: var(--primary-green) !important;
 }
 
-/* Decoração sutil no topo do card (opcional) */
-.hover-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 4px;
-    background: linear-gradient(90deg, #007bff, #00d2ff);
-    opacity: 0;
-    transition: opacity 0.3s ease;
+/* Rodapé Personalizado (Estilo Elo Stack) */
+footer.footer-custom {
+    background-color: #1e293b; /* Mesmo fundo do header */
+    color: var(--text-main);
+    border-top: 1px solid rgba(0,0,0,0.05);
 }
 
-.hover-card:hover::before {
-    opacity: 1;
+footer.footer-custom a {
+    color: var(--text-main);
+    transition: color 0.3s;
 }
 
-/* Estilização da Imagem/Ícone */
-.hover-card img {
-    transition: transform 0.4s ease;
-    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1)); /* Sombra no próprio ícone */
-}
-
-.hover-card:hover img {
-    transform: scale(1.15) rotate(3deg); /* Zoom e leve rotação divertida */
-}
-
-/* Tipografia do Título do Card */
-.hover-card .card-title {
-    font-family: 'Poppins', sans-serif; /* Certifique-se de importar essa fonte se quiser */
-    font-weight: 600;
-    color: #34495e;
-    margin-top: 15px;
-    transition: color 0.3s ease;
-}
-
-.hover-card:hover .card-title {
-    color: #9fa0a0; /* Muda para azul no hover */
-}
-
-/* Ajuste no link para remover sublinhados indesejados */
-a.text-decoration-none:hover {
+footer.footer-custom a:hover {
+    color: var(--primary-green) !important;
     text-decoration: none !important;
 }

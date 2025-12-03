@@ -1,29 +1,22 @@
 {% load static %}
-<footer class="bg-dark text-light py-4 mt-auto">
+<footer class="footer-custom py-4 mt-auto">
     <div class="container">
         <div class="row align-items-center">
             
             <div class="col-md-4 text-center text-md-start mb-3 mb-md-0">
                 <small class="d-block">&copy; {% now "Y" %} <strong>Business Stack</strong>.</small>
-                <small class="text-white-50">Todos os direitos reservados.</small>
+                <small class="text-muted">Todos os direitos reservados.</small>
             </div>
 
             <div class="col-md-4 text-center mb-3 mb-md-0">
-                <a href="{% url 'home' %}" class="text-white-50 text-decoration-none mx-2 hover-link">Home</a>
-                <a href="{% url 'contato' %}" class="text-white-50 text-decoration-none mx-2 hover-link">Suporte</a>
-                <a href="#" class="text-white-50 text-decoration-none mx-2 hover-link">Privacidade</a>
+                <a href="{% url 'home' %}" class="text-decoration-none mx-2 fw-medium">Home</a>
+                <a href="{% url 'contato' %}" class="text-decoration-none mx-2 fw-medium">Suporte</a>
+                <a href="#" class="text-decoration-none mx-2 fw-medium">Privacidade</a>
             </div>
 
             <div class="col-md-4 text-center text-md-end">
-                <span class="badge bg-secondary">v1.0.0</span>
+                <span class="badge bg-secondary opacity-75">v1.0.0</span>
             </div>
         </div>
     </div>
 </footer>
-
-<style>
-    .hover-link:hover {
-        color: #fff !important;
-        text-decoration: underline !important;
-    }
-</style>
