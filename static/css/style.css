@@ -1,313 +1,79 @@
-/* --- GERAL --- */
-body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    background-color: #f0f0f0;
-    color: #333;
-    font-size: 12px;
-    background-image:url(/static/img/fundoLogin.png);
-   
+/* --- Modern Dashboard Styles --- */
+
+/* Títulos mais elegantes */
+.page-title {
+    font-weight: 700;
+    color: #2c3e50;
+    letter-spacing: -0.02em;
+    text-shadow: 0 1px 1px rgba(255,255,255,0.8);
 }
 
-.page-container {
-    max-width: 1400px;
-    margin: 0 auto;
-    background-color: #fff;
-    border: 1px solid #ccc;
-}
-
-/* --- CABEÇALHO --- */
-.main-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 5px 20px;
-    background: linear-gradient(to bottom, #e8e8e8, #d8d8d8);
-    border-bottom: 2px solid #a0a0a0;
-}
-
-.header-left {
-    display: flex;
-    align-items: center;
-}
-
-.logo {
-    height: 50px;
-    margin-right: 15px;
-}
-
-.logo-text h1 {
-    margin: 0;
-    font-size: 24px;
-    color: #003366;
-}
-
-.logo-text span, .logo-text p {
-    margin: 0;
-    font-size: 11px;
-    color: #444;
-}
-
-.header-center h2 {
-    font-size: 16px;
-    color: #003366;
-    font-weight: bold;
-}
-
-.header-right {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    font-size: 11px;
-}
-
-/* --- NAVEGAÇÃO --- */
-.main-nav {
-    background-color: #cddde9;
-    padding: 0 10px;
-    border-bottom: 1px solid #99b4cc;
-}
-
-.main-nav ul {
-    margin: 0;
-    padding: 0;
-    list-style: none;
-    display: flex;
-}
-
-.main-nav a {
-    display: block;
-    padding: 8px 15px;
-    text-decoration: none;
-    color: #003366;
-    font-weight: bold;
-    border-right: 1px solid #b8cddb;
-}
-
-.main-nav a:hover, .main-nav a.active {
-    background-color: #e0eaf3;
-}
-
-/* --- BARRA DE FILTRO --- */
-.filter-bar {
-    padding: 10px 20px;
-    background-color: #f7f7f7;
-    border-bottom: 1px solid #ddd;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.filter-bar label {
-    font-weight: bold;
-}
-
-.filter-bar select, .filter-bar button {
-    padding: 4px 8px;
-    border: 1px solid #ccc;
-    border-radius: 3px;
-}
-
-.filter-bar button {
-    background-color: #e0e0e0;
-    cursor: pointer;
-}
-
-/* --- DASHBOARD GRID --- */
-.dashboard-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
-    padding: 20px;
-    background-color: #fff;
-}
-
-
-.chart-card {
-    border: 1px solid #ccc;
-    background-color: #f9f9f9;
-    padding: 15px;
-}
-
-.card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 10px;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 8px;
-}
-
-.card-header h3 {
-    margin: 0;
-    font-size: 13px;
-    color: #003366;
-}
-
-.card-header a {
-    font-size: 11px;
-    text-decoration: none;
-    color: #005a9c;
-}
-
-.card-body {
-    position: relative;
-    height: 220px; /* Altura fixa para os gráficos */
-}
-
-
-/* --- CONFIGURAÇÕES GERAIS E DE FUNDO --- */
-body, html {
-    margin: 0;
-    padding: 0;
-    height: 100%;
-    font-family: 'Poppins', sans-serif;
-    color: #ffffff;
-}
-
-.login-page-wrapper {
-    height: 100%;
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-image: url('https://i.imgur.com/393QRq0.jpg'), 
-                      linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4));
-    background-blend-mode: overlay;
-    background-size: cover;
-    background-position: center;
-}
-
-/* --- CONTAINER DO FORMULÁRIO --- */
-.login-container {
-    text-align: center;
-    max-width: 400px;
-    width: 100%;
-    padding: 20px;
-}
-
-/* --- CABEÇALHO --- */
-.login-header {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-bottom: 20px;
-}
-
-.emblem {
-    width: 60px;
-    margin-bottom: 10px;
-}
-
-.login-header h1 {
-    font-size: 1.5rem;
-    font-weight: 600;
-    letter-spacing: 1px;
-    margin: 0;
-}
-
-.login-container h2 {
-    font-size: 1.2rem;
+.text-muted {
+    color: #6c757d !important;
     font-weight: 400;
-    letter-spacing: 2px;
-    margin-bottom: 30px;
 }
 
-/* --- FORMULÁRIO E INPUTS --- */
-.login-form {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
+/* Estilo do Card Moderno */
+.hover-card {
+    background: rgba(255, 255, 255, 0.9); /* Fundo branco com leve transparência */
+    backdrop-filter: blur(10px); /* Efeito de desfoque no fundo (Glassmorphism) */
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    border-radius: 20px; /* Bordas bem arredondadas */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.04); /* Sombra inicial sutil */
+    transition: all 0.35s cubic-bezier(0.25, 0.8, 0.25, 1); /* Transição suave e elástica */
+    overflow: hidden;
+    position: relative;
 }
 
-.input-group {
-    display: flex;
-    align-items: center;
-    background-color: rgba(255, 255, 255, 0.95);
-    border-radius: 8px;
-    padding: 5px 15px;
+/* Efeito de Hover no Card */
+.hover-card:hover {
+    transform: translateY(-8px) scale(1.02); /* Levanta e cresce levemente */
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12); /* Sombra profunda e difusa */
+    border-color: rgba(134, 135, 136, 0.3); /* Borda azul sutil */
+    background: #ffffff;
 }
 
-.input-group .icon {
-    width: 20px;
-    height: 20px;
-    margin-right: 10px;
-    fill: #555;
-}
-
-.input-group input {
+/* Decoração sutil no topo do card (opcional) */
+.hover-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
-    border: none;
-    outline: none;
-    background-color: transparent;
-    padding: 12px 5px;
-    font-size: 1rem;
-    color: #333;
+    height: 4px;
+    background: linear-gradient(90deg, #007bff, #00d2ff);
+    opacity: 0;
+    transition: opacity 0.3s ease;
 }
 
-.input-group input::placeholder {
-    color: #888;
+.hover-card:hover::before {
+    opacity: 1;
 }
 
-/* --- OPÇÕES (LEMBRAR ACESSO) --- */
-.options {
-    text-align: right;
-    margin-top: 5px;
+/* Estilização da Imagem/Ícone */
+.hover-card img {
+    transition: transform 0.4s ease;
+    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1)); /* Sombra no próprio ícone */
 }
 
-.remember-me {
-    font-size: 0.9rem;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
+.hover-card:hover img {
+    transform: scale(1.15) rotate(3deg); /* Zoom e leve rotação divertida */
 }
 
-.remember-me input {
-    margin-right: 8px;
-    cursor: pointer;
-}
-
-/* --- BOTÃO E LINK --- */
-.btn-login {
-    background-color: #007bff;
-    color: white;
-    border: none;
-    padding: 15px;
-    border-radius: 8px;
-    font-size: 1.1rem;
+/* Tipografia do Título do Card */
+.hover-card .card-title {
+    font-family: 'Poppins', sans-serif; /* Certifique-se de importar essa fonte se quiser */
     font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.2s ease;
-    margin-top: 10px;
-}
-
-.btn-login:hover {
-    background-color: #0056b3;
-    transform: translateY(-2px);
-}
-
-.forgot-link {
-    color: #d0d0d0;
-    text-decoration: none;
-    font-size: 0.9rem;
+    color: #34495e;
     margin-top: 15px;
+    transition: color 0.3s ease;
 }
 
-.forgot-link:hover {
-    text-decoration: underline;
+.hover-card:hover .card-title {
+    color: #9fa0a0; /* Muda para azul no hover */
 }
 
-/* --- RODAPÉ --- */
-.page-footer {
-    position: fixed;
-    bottom: 20px;
-    left: 20px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 0.8rem;
-}
-
-.footer-logo {
-    width: 30px;
+/* Ajuste no link para remover sublinhados indesejados */
+a.text-decoration-none:hover {
+    text-decoration: none !important;
 }

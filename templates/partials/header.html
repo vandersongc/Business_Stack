@@ -1,47 +1,41 @@
-{% extends 'base.html' %}
 {% load static %}
-
-{% block title %}Tela Inicial{% endblock %}
-
-{% block content %}
-    <h2 class="page-title">Bem-vindo ao GionTech</h2>
-    <p>Escolha o módulo de trabalho:</p>
-    <br>
-    
-    <div class="module-grid">
-        <a href="{% url 'administrador' %}" class="module-card">
-            <img src="{% static 'img/pasta.png' %}" alt="Ícone Pasta">
-            <span>Administrador</span>
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+    <div class="container">
+        <a class="navbar-brand d-flex align-items-center fw-bold" href="{% url 'home' %}">
+            <img src="{% static 'img/BS_Logo_Retangular.jpg' %}" alt="Logo" width="40" height="40" class="d-inline-block align-text-top me-2 rounded-circle bg-white p-1">
+            Business Stack
         </a>
 
-        <a href="{% url 'auditoria' %}" class="module-card">
-            <img src="{% static 'img/pasta.png' %}" alt="Ícone Pasta">
-            <span>Auditoria</span>
-        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
 
-        <a href="{% url 'contabilidade' %}" class="module-card">
-            <img src="{% static 'img/pasta.png' %}" alt="Ícone Pasta">
-            <span>Contabilidade</span>
-        </a>
+        <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+            <ul class="navbar-nav align-items-center">
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'home' %}active fw-bold{% endif %}" aria-current="page" href="{% url 'home' %}">
+                        <i class="bi bi-house-door"></i> Início
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'configuracoes' %}active fw-bold{% endif %}" href="{% url 'configuracoes' %}">
+                        <i class="bi bi-gear"></i> Configurações
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'contato' %}active fw-bold{% endif %}" href="{% url 'contato' %}">
+                        <i class="bi bi-chat-dots"></i> Fale Conosco
+                    </a>
+                </li>
+                
+                <li class="nav-item d-none d-lg-block mx-2 border-end border-white opacity-50" style="height: 24px;"></li>
 
-        <a href="{% url 'financeiro' %}" class="module-card">
-            <img src="{% static 'img/pasta.png' %}" alt="Ícone Pasta">
-            <span>Financeiro</span>
-        </a>
-
-        <a href="{% url 'logistica' %}" class="module-card">
-            <img src="{% static 'img/pasta.png' %}" alt="Ícone Pasta">
-            <span>Logística</span>
-        </a>
-
-        <a href="{% url 'pessoal' %}" class="module-card">
-            <img src="{% static 'img/pasta.png' %}" alt="Ícone Pasta">
-            <span>Pessoal</span>
-        </a>
-    
-        <a href="{% url 'suprimentos' %}" class="module-card">
-            <img src="{% static 'img/pasta.png' %}" alt="Ícone Pasta">
-            <span>Suprimentos/ Compras</span>
-        </a>
+                <li class="nav-item ms-lg-2">
+                    <a class="btn btn-outline-light btn-sm rounded-pill px-3" href="{% url 'logout' %}">
+                        <i class="bi bi-box-arrow-right"></i> Sair
+                    </a>
+                </li>
+            </ul>
+        </div>
     </div>
-{% endblock %}
+</nav>

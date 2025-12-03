@@ -1,104 +1,44 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Página Inicial | GionTech{% endblock %}
+{% block title %}Página Inicial | Business Stack{% endblock %}
 
 {% block content %}
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
+<style>
+    /* Cole o CSS da Opção 1 aqui se preferir manter local */
+    .hover-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 16px;
+        border: none;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .hover-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+    }
+    .hover-card img {
+        transition: transform 0.3s ease;
+    }
+    .hover-card:hover img {
+        transform: scale(1.1);
+    }
+    .card-title {
+        font-family: 'Poppins', sans-serif;
+        font-weight: 600;
+        color: #333;
+    }
+</style>
+
 <div class="container py-5">
     <div class="text-center mb-5">
-        <h2 class="page-title display-5">Bem-vindo ao GionTech</h2>
-        <p class="lead text-muted">Escolha o módulo de trabalho para iniciar:</p>
+        <h2 class="page-title display-5 fw-bold">Bem-vindo ao Business Stack</h2>
+        <p class="lead text-muted">Selecione um módulo para acessar o painel de controle.</p>
     </div>
     
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 justify-content-center">
-        
-        <div class="col">
-            <a href="{% url 'administrador' %}" class="text-decoration-none">
-                <div class="card h-100 shadow-sm border-0 text-center hover-card">
-                    <div class="card-body py-4">
-                        <img src="{% static 'img/BS_Logo_Retangular.jpg' %}" alt="Ícone Administrador" class="mb-3" style="width: 64px;">
-                        <h5 class="card-title text-dark">Administrador</h5>
-                    </div>
-                </div>
-            </a>
-        </div>
-
-        <div class="col">
-            <a href="{% url 'auditoria' %}" class="text-decoration-none">
-                <div class="card h-100 shadow-sm border-0 text-center hover-card">
-                    <div class="card-body py-4">
-                        <img src="{% static 'img/pasta.png' %}" alt="Ícone Auditoria" class="mb-3" style="width: 64px;">
-                        <h5 class="card-title text-dark">Auditoria</h5>
-                    </div>
-                </div>
-            </a>
-        </div>
-
-        <div class="col">
-            <a href="{% url 'contabilidade' %}" class="text-decoration-none">
-                <div class="card h-100 shadow-sm border-0 text-center hover-card">
-                    <div class="card-body py-4">
-                        <img src="{% static 'img/pasta.png' %}" alt="Ícone Contabilidade" class="mb-3" style="width: 64px;">
-                        <h5 class="card-title text-dark">Contabilidade</h5>
-                    </div>
-                </div>
-            </a>
-        </div>
-
-        <div class="col">
-            <a href="{% url 'financeiro' %}" class="text-decoration-none">
-                <div class="card h-100 shadow-sm border-0 text-center hover-card">
-                    <div class="card-body py-4">
-                        <img src="{% static 'img/pasta.png' %}" alt="Ícone Financeiro" class="mb-3" style="width: 64px;">
-                        <h5 class="card-title text-dark">Financeiro</h5>
-                    </div>
-                </div>
-            </a>
-        </div>
-
-        <div class="col">
-            <a href="{% url 'logistica' %}" class="text-decoration-none">
-                <div class="card h-100 shadow-sm border-0 text-center hover-card">
-                    <div class="card-body py-4">
-                        <img src="{% static 'img/pasta.png' %}" alt="Ícone Logística" class="mb-3" style="width: 64px;">
-                        <h5 class="card-title text-dark">Logística</h5>
-                    </div>
-                </div>
-            </a>
-        </div>
-
-        <div class="col">
-            <a href="{% url 'pessoal' %}" class="text-decoration-none">
-                <div class="card h-100 shadow-sm border-0 text-center hover-card">
-                    <div class="card-body py-4">
-                        <img src="{% static 'img/pasta.png' %}" alt="Ícone Pessoal" class="mb-3" style="width: 64px;">
-                        <h5 class="card-title text-dark">Pessoal</h5>
-                    </div>
-                </div>
-            </a>
-        </div>
-
-        <div class="col">
-            <a href="{% url 'suprimentos' %}" class="text-decoration-none">
-                <div class="card h-100 shadow-sm border-0 text-center hover-card">
-                    <div class="card-body py-4">
-                        <img src="{% static 'img/pasta.png' %}" alt="Ícone Suprimentos" class="mb-3" style="width: 64px;">
-                        <h5 class="card-title text-dark">Suprimentos / Compras</h5>
-                    </div>
-                </div>
-            </a>
-        </div>
-
-    </div>
+       </div>
 </div>
-
-<style>
-    .hover-card {
-        transition: transform 0.2s ease-in-out;
-    }
-    .hover-card:hover {
-        transform: translateY(-5px);
-        background-color: #f8f9fa;
-    }
-</style>
 {% endblock %}
