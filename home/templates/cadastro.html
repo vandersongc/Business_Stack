@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}Cadastro{% endblock %}
+
+{% block content %}
+<div class="glass-box" style="max-width: 500px;">
+    <p class="panel-title">Criar Nova Conta</p>
+    
+    <form method="post" style="width: 100%; display: flex; flex-direction: column; gap: 10px;">
+        {% csrf_token %}
+        
+        {% for field in form %}
+            <div style="display: flex; flex-direction: column; gap: 5px; width: 100%;">
+                <label for="{{ field.id_for_label }}" style="color: white; font-weight: bold; text-align: left;">
+                    {{ field.label }}:
+                </label>
+                {{ field }}
+                
+                {% if field.errors %}
+                    <div style="color: #ffcccc; font-size: 0.9em; text-align: left;">
+                        {% for error in field.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        {% endfor %}
+
+        <button type="submit" class="submit-button" style="align-self: center;">
+            Cadastrar
+        </button>
+    </form>
+
+    <div style="margin-top: 20px; font-size: 0.9em;">
+        <p>Já tem uma conta? <a href="{% url 'login' %}" style="color: var(--color-secondary); text-decoration: none; font-weight: bold;">Faça Login</a></p>
+    </div>
+</div>
+{% endblock %}

@@ -39,25 +39,17 @@
                 {% else %}
                     
                     <li class="nav-item ms-lg-2">
-                        <a class="nav-link text-light" href="#">
+                        <a class="nav-link text-light" href="{% url 'cadastro' %}">
                             <i class="bi bi-person-plus me-1"></i> Cadastro
                         </a>
                     </li>
 
-                    <li class="nav-item">
-                        <form class="d-flex gap-2 align-items-center" method="post" action="#">
-                            {% csrf_token %}
-                            
-                            <div class="input-group input-group-sm">
-                                <input type="text" name="username" class="form-control" placeholder="Usuário" aria-label="Usuário" required style="max-width: 120px;">
-                            </div>
+                    <li class="nav-item ms-lg-2">
+                        <a class="nav-link text-light" href="{% url 'login' %}">
+                            <i class="bi bi-person-plus me-1"></i> Login
+                        </a>
+                    </li>
 
-                            <div class="input-group input-group-sm">
-                                <input type="password" name="password" class="form-control" placeholder="Senha" aria-label="Senha" required style="max-width: 120px;">
-                            </div>
-
-                            <button class="btn btn-sm btn-primary fw-bold px-3" type="submit">
-                                Entrar
                             </button>
                         </form>
                     </li>

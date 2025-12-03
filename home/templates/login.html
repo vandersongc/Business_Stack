@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+<form class="glass-box" method="post">
+    {% csrf_token %} <p class="panel-title">Acesso ao Sistema</p>
+    
+    <label for="username">E-mail:</label>
+    <input type="email" id="username" name="username" required placeholder="seu@email.com">
+    
+    <label for="password">Senha:</label>
+    <input type="password" id="password" name="password" required>
+    
+    <button type="submit" class="submit-button">
+        →
+    </button>
+    <p>Não possui conta? <a href="{% url 'cadastro' %}" style="color: var(--color-secondary); text-decoration: none; font-weight: bold;">Faça cadastro</a></p>
+</form>
+{% endblock %}
