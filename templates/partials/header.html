@@ -1,41 +1,40 @@
 {% load static %}
-<nav class="navbar navbar-expand-lg navbar-light navbar-custom py-3 shadow-sm">
+<nav class="navbar navbar-expand-lg navbar-dark navbar-custom py-3 fixed-top">
     <div class="container">
-        <a class="navbar-brand d-flex align-items-center fw-bold" href="{% url 'home' %}" style="color: #1e293b;">
-            <img src="{% static 'img/BS_Logo_Retangular.jpg' %}" alt="Logo" width="40" height="40" class="d-inline-block align-text-top me-2 rounded-circle">
+        <a class="navbar-brand d-flex align-items-center fw-bold" href="{% url 'home' %}">
+            <img src="{% static 'img/BS_Logo_Retangular.jpg' %}" alt="Logo" width="40" height="40" class="d-inline-block align-text-top me-2 rounded bg-white p-1">
             Business Stack
         </a>
 
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>
         </button>
 
         <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
-            <ul class="navbar-nav align-items-center">
+            <ul class="navbar-nav align-items-center gap-3">
                 <li class="nav-item">
-                    <a class="nav-link {% if request.resolver_match.url_name == 'home' %}active fw-bold{% endif %}" aria-current="page" href="{% url 'home' %}">
-                        <i class="bi bi-house-door"></i> Início
+                    <a class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}" href="{% url 'home' %}">
+                        <i class="bi bi-grid-fill me-1"></i> Dashboard
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link {% if request.resolver_match.url_name == 'configuracoes' %}active fw-bold{% endif %}" href="{% url 'configuracoes' %}">
-                        <i class="bi bi-gear"></i> Configurações
+                    <a class="nav-link {% if request.resolver_match.url_name == 'configuracoes' %}active{% endif %}" href="{% url 'configuracoes' %}">
+                        <i class="bi bi-gear-fill me-1"></i> Configurações
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link {% if request.resolver_match.url_name == 'contato' %}active fw-bold{% endif %}" href="{% url 'contato' %}">
-                        <i class="bi bi-chat-dots"></i> Fale Conosco
+                    <a class="nav-link {% if request.resolver_match.url_name == 'contato' %}active{% endif %}" href="{% url 'contato' %}">
+                        <i class="bi bi-chat-text-fill me-1"></i> Ajuda
                     </a>
                 </li>
                 
-                <li class="nav-item d-none d-lg-block mx-2 border-end border-dark opacity-25" style="height: 24px;"></li>
-
                 <li class="nav-item ms-lg-2">
-                    <a class="btn btn-outline-dark btn-sm rounded-pill px-3" href="{% url 'logout' %}">
-                        <i class="bi bi-box-arrow-right"></i> Sair
+                    <a class="btn btn-outline-custom btn-sm rounded-pill px-4 fw-bold" href="{% url 'logout' %}">
+                        Sair
                     </a>
                 </li>
             </ul>
         </div>
     </div>
 </nav>
+<div style="margin-top: 80px;"></div>

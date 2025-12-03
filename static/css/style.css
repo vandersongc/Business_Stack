@@ -1,47 +1,65 @@
-/* ... Mantenha o conteúdo anterior do seu CSS ... */
-
-/* --- CORES E ESTILOS DO ELO STACK (ADICIONADO) --- */
+/* --- VARIAVEIS DE COR E TEMA --- */
 :root {
-    --bg-nav: #1e293b;              /* Cor de fundo clara (Elo Stack) */
-    --text-heading: rgb(202, 199, 199);        /* Cor do texto escuro */
-    --text-main:rgb(202, 199, 199);           /* Cor do texto principal */
-    --primary-green: rgb(202, 199, 199);       /* Verde destaque Elo Stack */
+    --bg-dark: #1e293b;            /* Cor solicitada para Header/Footer */
+    --bg-body: #f1f5f9;            /* Cinza claro para o meio do projeto */
+    --text-light: #f8fafc;         /* Texto claro para fundo escuro */
+    --text-dark: #334155;          /* Texto escuro para fundo claro */
+    --accent-color: #38bdf8;       /* Azul Ciano vibrante para destaque/botões */
+    --accent-hover: #0ea5e9;       /* Azul um pouco mais escuro para hover */
+    --card-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
 
-/* Navbar Personalizada (Estilo Elo Stack) */
+body {
+    background-color: var(--bg-body);
+    color: var(--text-dark);
+    font-family: 'Poppins', sans-serif;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+main {
+    flex: 1;
+}
+
+/* --- HEADER & FOOTER (Fundo Escuro) --- */
+.bg-custom-dark {
+    background-color: var(--bg-dark) !important;
+    color: var(--text-light);
+}
+
+/* Navbar */
 .navbar-custom {
-    background-color: #1e293b; /* Fundo claro com transparência */
-    backdrop-filter: blur(10px);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
-    border-bottom: 1px solid rgba(0,0,0,0.03);
+    background-color: var(--bg-dark);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+}
+
+.navbar-custom .navbar-brand {
+    color: var(--text-light) !important;
+}
+
+.navbar-custom .nav-link {
+    color: #cbd5e1 !important; /* Cinza claro */
+    font-weight: 500;
     transition: all 0.3s ease;
 }
 
-/* Links da Navbar */
-.navbar-custom .nav-link {
-    color: var(--text-heading) !important;
-    font-weight: 500;
-    transition: color 0.3s;
-}
-
-.navbar-custom .nav-link:hover, 
+.navbar-custom .nav-link:hover,
 .navbar-custom .nav-link.active {
-    color: var(--primary-green) !important;
+    color: var(--accent-color) !important;
+    transform: translateY(-2px);
+    text-shadow: 0 0 10px rgba(56, 189, 248, 0.4); /* Brilho sutil */
 }
 
-/* Rodapé Personalizado (Estilo Elo Stack) */
-footer.footer-custom {
-    background-color: #1e293b; /* Mesmo fundo do header */
-    color: var(--text-main);
-    border-top: 1px solid rgba(0,0,0,0.05);
+/* Botão Sair no Header */
+.btn-outline-custom {
+    color: var(--accent-color);
+    border: 1px solid var(--accent-color);
+    transition: all 0.3s ease;
 }
 
-footer.footer-custom a {
-    color: var(--text-main);
-    transition: color 0.3s;
-}
-
-footer.footer-custom a:hover {
-    color: var(--primary-green) !important;
-    text-decoration: none !important;
+.btn-outline-custom:hover {
+    background-color: var(--accent-color);
+    color: var(--bg-dark);
+    box-shadow: 0 0 15px rgba(56, 189, 248, 0.5);
 }

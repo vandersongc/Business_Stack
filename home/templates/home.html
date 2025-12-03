@@ -1,44 +1,66 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Página Inicial | Business Stack{% endblock %}
+{% block title %}Dashboard | Business Stack{% endblock %}
 
 {% block content %}
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-
-<style>
-    /* Cole o CSS da Opção 1 aqui se preferir manter local */
-    .hover-card {
-        background: rgba(255, 255, 255, 0.95);
-        border-radius: 16px;
-        border: none;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-    .hover-card:hover {
-        transform: translateY(-10px);
-        box-shadow: 0 15px 30px rgba(0,0,0,0.15);
-    }
-    .hover-card img {
-        transition: transform 0.3s ease;
-    }
-    .hover-card:hover img {
-        transform: scale(1.1);
-    }
-    .card-title {
-        font-family: 'Poppins', sans-serif;
-        font-weight: 600;
-        color: #333;
-    }
-</style>
-
 <div class="container py-5">
     <div class="text-center mb-5">
-        <h2 class="page-title display-5 fw-bold">Bem-vindo ao Business Stack</h2>
-        <p class="lead text-muted">Selecione um módulo para acessar o painel de controle.</p>
+        <h2 class="page-title display-5 mb-3">Painel de Controle</h2>
+        <p class="lead text-muted">Acesse suas áreas de gestão abaixo</p>
     </div>
     
-    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 justify-content-center">
-       </div>
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4 justify-content-center">
+        
+        <div class="col">
+            <a href="{% url 'administrador' %}" class="module-card">
+                <img src="{% static 'img/pasta.png' %}" alt="Admin">
+                <span>Administrador</span>
+            </a>
+        </div>
+
+        <div class="col">
+            <a href="{% url 'financeiro' %}" class="module-card">
+                <img src="{% static 'img/pasta.png' %}" alt="Financeiro">
+                <span>Financeiro</span>
+            </a>
+        </div>
+
+        <div class="col">
+            <a href="{% url 'pessoal' %}" class="module-card">
+                <img src="{% static 'img/pasta.png' %}" alt="RH">
+                <span>Pessoal</span>
+            </a>
+        </div>
+
+        <div class="col">
+            <a href="{% url 'suprimentos' %}" class="module-card">
+                <img src="{% static 'img/pasta.png' %}" alt="Suprimentos">
+                <span>Suprimentos</span>
+            </a>
+        </div>
+
+        <div class="col">
+            <a href="{% url 'contabilidade' %}" class="module-card">
+                <img src="{% static 'img/pasta.png' %}" alt="Contabilidade">
+                <span>Contabilidade</span>
+            </a>
+        </div>
+
+        <div class="col">
+            <a href="{% url 'logistica' %}" class="module-card">
+                <img src="{% static 'img/pasta.png' %}" alt="Logística">
+                <span>Logística</span>
+            </a>
+        </div>
+
+        <div class="col">
+            <a href="{% url 'auditoria' %}" class="module-card">
+                <img src="{% static 'img/pasta.png' %}" alt="Auditoria">
+                <span>Auditoria</span>
+            </a>
+        </div>
+
+    </div>
 </div>
 {% endblock %}
