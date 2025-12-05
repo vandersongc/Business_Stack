@@ -1,27 +1,24 @@
+<<<<<<< HEAD
+=======
+
+>>>>>>> c601ad549cbc259d07cd4e7e52e3c291715da4c7
 {% extends "base.html" %}
 
 {% block title %}Login{% endblock %}
 
 {% block content %}
 <form class="glass-box" method="post">
-    {% csrf_token %}
-    <p class="panel-title">Acesso ao Sistema</p>
+    {% csrf_token %} <p class="panel-title">Acesso ao Sistema</p>
     
-    <label for="username">Usuário ou E-mail:</label>
-    <input type="text" id="username" name="username" required placeholder="Digite seu usuário">
+    <label for="username">E-mail:</label>
+    <input type="email" id="username" name="username" required placeholder="seu@email.com">
     
     <label for="password">Senha:</label>
-    <input type="password" id="password" name="password" required placeholder="Digite sua senha">
+    <input type="password" id="password" name="password" required>
     
     <button type="submit" class="submit-button">
-        Entrar
+        →
     </button>
-    
-    <p style="margin-top: 1rem;">
-        Não possui conta? 
-        <a href="{% url 'cadastro' %}" style="color: var(--color-secondary); text-decoration: none; font-weight: bold;">
-            Faça cadastro
-        </a>
-    </p>
+    <p>Não possui conta? <a href="{% url 'cadastro' %}" style="color: var(--color-secondary); text-decoration: none; font-weight: bold;">Faça cadastro</a></p>
 </form>
 {% endblock %}
