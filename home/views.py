@@ -4,30 +4,28 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
+from .forms import CadastroForm
 
 def home(request):
     return render(request, 'home.html')
 
 def cadastro(request):
     if request.method == 'POST':
-        form = UserCreationForm(request.POST)
+        # Troque UserCreationForm por CadastroForm aqui
+        form = CadastroForm(request.POST) 
         if form.is_valid():
             user = form.save()
             
             # --- LÓGICA DE GRUPOS ---
-            # Garante que os grupos existam
             grupo_usuario, created = Group.objects.get_or_create(name='Usuário')
-            Group.objects.get_or_create(name='Gestor') # Cria o Gestor para uso futuro
-            
-            # Adiciona o novo usuário ao grupo 'Usuário' automaticamente
+            Group.objects.get_or_create(name='Gestor')
             user.groups.add(grupo_usuario)
             
-            # --- MENSAGEM MODERNA ---
             messages.success(request, 'Cadastro realizado com sucesso! Faça login para continuar.')
-            
             return redirect('login')
     else:
-        form = UserCreationForm()
+        # E troque UserCreationForm por CadastroForm aqui também
+        form = CadastroForm()
         
     return render(request, 'cadastro.html', {'form': form})
 
