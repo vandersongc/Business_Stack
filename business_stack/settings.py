@@ -129,3 +129,22 @@ STATICFILES_DIRS = [
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# --- CONFIGURAÇÃO DE AUTENTICAÇÃO ---
+
+# Diz ao Django para tentar logar pelo nosso Backend de Email E pelo padrão (username)
+AUTHENTICATION_BACKENDS = [
+    'home.backends.EmailBackend',           # Login por E-mail
+    'django.contrib.auth.backends.ModelBackend', # Login padrão (segurança extra)
+]
+
+# --- CONFIGURAÇÕES DE LOGIN E REDIRECIONAMENTO ---
+
+# Para onde ir após o login dar certo (sua Dashboard)
+LOGIN_REDIRECT_URL = 'home'
+
+# Para onde ir após fazer logout (Voltar para a tela de login)
+LOGOUT_REDIRECT_URL = 'login'
+
+# Para onde ir se tentar acessar uma página restrita sem estar logado
+LOGIN_URL = 'login'
