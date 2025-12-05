@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}Cadastro{% endblock %}
+
+{% block content %}
+<div class="glass-box" style="max-width: 500px;">
+    <p class="panel-title">Criar Nova Conta</p>
+    
+    <form method="post" style="width: 100%; display: flex; flex-direction: column; gap: 10px;">
+        {% csrf_token %}
+        
+        {% if form %}
+            {% for field in form %}
+                <div style="display: flex; flex-direction: column; gap: 5px; width: 100%;">
+                    <label for="{{ field.id_for_label }}" style="color: var(--text-dark); font-weight: bold; text-align: left;">
+                        {{ field.label }}:
+                    </label>
+                    {{ field }}
+                    
+                    {% if field.errors %}
+                        <div style="color: #ef4444; font-size: 0.9em; text-align: left;">
+                            {% for error in field.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        {% else %}
+            <label>Nome Completo</label>
+            <input type="text" name="nome" required>
+
+            <label>E-mail</label>
+            <input type="email" name="email" required>
+
+            <label>Senha</label>
+            <input type="password" name="senha" required>
+        {% endif %}
+
+        <button type="submit" class="submit-button" style="align-self: center;">
+            Cadastrar
+        </button>
+    </form>
+
+    <div style="margin-top: 20px; font-size: 0.9em;">
+        <p>Já tem uma conta? <a href="{% url 'login' %}" style="color: var(--color-secondary); text-decoration: none; font-weight: bold;">Faça Login</a></p>
+    </div>
+</div>
+{% endblock %}
