@@ -1,6 +1,13 @@
 from django.shortcuts import render
-from django.http import HttpResponse
 
-# Crie a função 'home' que o seu urls.py está procurando
+# Página Inicial
 def home(request):
     return render(request, 'home.html') 
+
+# Cadastro
+def cadastro(request):
+    return render(request, 'cadastro.html')
+
+# Login
+def login(request):
+    return render(request, 'login.html')
