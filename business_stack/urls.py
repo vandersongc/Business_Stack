@@ -1,20 +1,24 @@
 from django.contrib import admin
 from django.urls import path
 from home import views as home_views
-from . import views as temp_views
+# Se estiver usando temp_views para outras coisas, mantenha a importação:
+from . import views as temp_views 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     
-    # Rota da Página Inicial
     path('', home_views.home, name='home'),
-
-    # --- ROTAS DE AUTENTICAÇÃO (Adicione isto) ---
+    
+    # Rotas de Autenticação
     path('cadastro/', home_views.cadastro, name='cadastro'),
-    path('login/', home_views.login, name='login'),
-    # ---------------------------------------------
+    
+    # --- CORREÇÃO AQUI: Use .login_view em vez de .login ---
+    path('login/', home_views.login_view, name='login'),
+    # -------------------------------------------------------
+    
+    path('logout/', home_views.logout_view, name='logout'),
 
-    # Rotas dos Módulos (Views temporárias)
+    # Rotas dos Módulos (seus outros links)
     path('administrador/', temp_views.administrador, name='administrador'),
     path('auditoria/', temp_views.auditoria, name='auditoria'),
     path('contabilidade/', temp_views.contabilidade, name='contabilidade'),
@@ -26,5 +30,4 @@ urlpatterns = [
     # Menus
     path('contato/', temp_views.contato, name='contato'),
     path('configuracoes/', temp_views.configuracoes, name='configuracoes'),
-    path('logout/', temp_views.logout_view, name='logout'),
 ]
