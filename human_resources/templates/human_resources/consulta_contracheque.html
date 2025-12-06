@@ -53,9 +53,13 @@
                                 <td>{{ func.cargo }}</td>
                                 <td>{{ func.departamento }}</td>
                                 <td class="text-end">
+                                    <a href="{% url 'visualizar_contracheque' func.id %}" class="btn btn-sm btn-info text-white fw-bold rounded-pill px-3 me-2">
+                                        <i class="bi bi-eye-fill me-1"></i> Ver
+                                    </a>
+                                    
                                     <a href="{% url 'gerar_contracheque_pdf' func.id %}" target="_blank" 
                                        class="btn btn-sm btn-danger fw-bold rounded-pill px-3">
-                                        <i class="bi bi-file-earmark-pdf me-1"></i> Gerar PDF
+                                        <i class="bi bi-file-earmark-pdf me-1"></i> PDF
                                     </a>
                                 </td>
                             </tr>

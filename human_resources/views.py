@@ -222,20 +222,49 @@ def consulta_contracheque(request):
         'termo_busca': termo_busca
     })
 
+# ... imports existentes ...
+
+@login_required
+def visualizar_contracheque(request, funcionario_id):
+    funcionario = get_object_or_404(Funcionario, pk=funcionario_id)
+    date_str = datetime.datetime.now()
+    
+    # Prepara os dados calculados
+    inss = funcionario.calcular_inss()
+    irpf = funcionario.calcular_irpf()
+    
+    context = {
+        'f': funcionario,
+        'inss': inss,
+        'irpf': irpf,
+        'total_descontos': inss + irpf,
+        'mes_referencia': date_str.strftime("%m/%Y"),
+        'data_emissao': date_str
+    }
+    
+    return render(request, 'human_resources/visualizar_contracheque.html', context)
+
 @login_required
 def gerar_contracheque_pdf(request, funcionario_id):
     funcionario = get_object_or_404(Funcionario, pk=funcionario_id)
     date_str = datetime.datetime.now()
     
+    # Mesmos cálculos para o PDF ficar igual à tela
+    inss = funcionario.calcular_inss()
+    irpf = funcionario.calcular_irpf()
+    
     context = {
         'f': funcionario,
-        'hoje': date_str,
-        'mes_referencia': date_str.strftime("%m/%Y")
+        'inss': inss,
+        'irpf': irpf,
+        'total_descontos': inss + irpf,
+        'mes_referencia': date_str.strftime("%m/%Y"),
+        'hoje': date_str
     }
     
     html_string = render_to_string('human_resources/contracheque_pdf_template.html', context)
     response = HttpResponse(content_type='application/pdf')
-    filename = f"Contracheque_{funcionario.nome_completo.replace(' ', '_')}_{date_str.strftime('%Y_%m')}.pdf"
+    filename = f"Holerite_{funcionario.nome_completo}_{date_str.strftime('%m-%Y')}.pdf"
     response['Content-Disposition'] = f'attachment; filename="{filename}"'
     
     pisa_status = pisa.CreatePDF(html_string, dest=response)

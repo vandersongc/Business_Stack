@@ -22,6 +22,7 @@ urlpatterns = [
     path('folha_pagamento/', rh_views.folha_pagamento, name='folha_pagamento'),
     path('exportar_folha/<str:formato>/', rh_views.exportar_folha, name='exportar_folha'),
     path('contracheque/', rh_views.consulta_contracheque, name='consulta_contracheque'),
+    path('contracheque/visualizar/<int:funcionario_id>/', rh_views.visualizar_contracheque, name='visualizar_contracheque'),
     path('contracheque/pdf/<int:funcionario_id>/', rh_views.gerar_contracheque_pdf, name='gerar_contracheque_pdf'),
     # ----------------------------------
     

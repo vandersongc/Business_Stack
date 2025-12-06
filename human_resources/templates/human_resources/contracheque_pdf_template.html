@@ -7,7 +7,6 @@
         body { font-family: Helvetica, Arial, sans-serif; font-size: 11px; color: #000; }
         
         .box { border: 1px solid #000; margin-bottom: 10px; padding: 5px; }
-        .header-title { font-weight: bold; font-size: 14px; text-align: center; background-color: #eee; padding: 5px; border-bottom: 1px solid #000; }
         
         table { width: 100%; border-collapse: collapse; }
         th, td { padding: 4px; text-align: left; }
@@ -72,12 +71,22 @@
                 </tr>
                 
                 <tr>
-                    <td class="col-code">900</td>
-                    <td>INSS / Encargos (Estimado)</td>
-                    <td class="col-ref">17%</td>
+                    <td class="col-code">901</td>
+                    <td>INSS (Previdência Social)</td>
+                    <td class="col-ref">Tab.</td>
                     <td class="col-money">0,00</td>
-                    <td class="col-money">{{ f.calculo_descontos|floatformat:2 }}</td>
+                    <td class="col-money">{{ inss|floatformat:2 }}</td>
                 </tr>
+
+                {% if irpf > 0 %}
+                <tr>
+                    <td class="col-code">911</td>
+                    <td>IRRF (Imposto de Renda)</td>
+                    <td class="col-ref">Tab.</td>
+                    <td class="col-money">0,00</td>
+                    <td class="col-money">{{ irpf|floatformat:2 }}</td>
+                </tr>
+                {% endif %}
             </tbody>
         </table>
     </div>
@@ -87,7 +96,7 @@
             <tr>
                 <td colspan="3" style="text-align: right;">TOTAIS:</td>
                 <td class="col-money">{{ f.salario|floatformat:2 }}</td>
-                <td class="col-money">{{ f.calculo_descontos|floatformat:2 }}</td>
+                <td class="col-money">{{ total_descontos|floatformat:2 }}</td>
             </tr>
         </table>
     </div>
@@ -98,9 +107,9 @@
                 <td width="70%">
                     <strong>Salário Base:</strong> R$ {{ f.salario|floatformat:2 }}
                     &nbsp;&nbsp;|&nbsp;&nbsp;
-                    <strong>Base INSS:</strong> R$ {{ f.salario|floatformat:2 }}
+                    <strong>Base Calc. INSS:</strong> R$ {{ f.salario|floatformat:2 }}
                     &nbsp;&nbsp;|&nbsp;&nbsp;
-                    <strong>Base FGTS:</strong> R$ {{ f.salario|floatformat:2 }}
+                    <strong>Base Calc. FGTS:</strong> R$ {{ f.salario|floatformat:2 }}
                 </td>
                 <td width="30%" style="border: 1px solid #000; padding: 10px; text-align: right; background-color: #ddd;">
                     <small>LÍQUIDO A RECEBER</small><br>

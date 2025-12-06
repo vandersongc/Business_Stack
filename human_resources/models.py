@@ -3,7 +3,6 @@ from decimal import Decimal
 
 class Funcionario(models.Model):
     # --- Opções de escolha (Dropdowns) ---
-
     ESTADO_CIVIL_CHOICES = [
         ('solteiro', 'Solteiro(a)'),
         ('casado', 'Casado(a)'),
@@ -62,30 +61,79 @@ class Funcionario(models.Model):
     bairro = models.CharField(max_length=100, verbose_name="Bairro", blank=True, null=True)
     cidade = models.CharField(max_length=100, verbose_name="Cidade", blank=True, null=True)
     uf = models.CharField(max_length=2, verbose_name="UF", blank=True, null=True)
+    
+    # --- Status ---
+    desligado = models.BooleanField(default=False, verbose_name="Colaborador Desligado?")
+    data_desligamento = models.DateField(verbose_name="Data do Desligamento", blank=True, null=True)
 
     # Registro de sistema
     criado_em = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.nome_completo
-    
-    # --- CAMPOS PARA DESLIGAMENTO ---
-    desligado = models.BooleanField(default=False, verbose_name="Colaborador Desligado?")
-    data_desligamento = models.DateField(verbose_name="Data do Desligamento", blank=True, null=True)
 
-    # ... (restante dos campos: cep, logradouro, criado_em, def __str__) ...
+    # =================================================================
+    # === CÁLCULOS DE FOLHA DE PAGAMENTO (LEGISLAÇÃO VIGENTE) ===
+    # =================================================================
 
-    # --- CÁLCULOS AUTOMÁTICOS (PROPRIEDADES) ---
+    def calcular_inss(self):
+        """Calcula o INSS Progressivo (Tabela 2024/2025)"""
+        salario = self.salario or Decimal(0)
+        teto_inss = Decimal('7786.02')
+        
+        if salario > teto_inss:
+            return Decimal('908.85')
+
+        desconto = Decimal(0)
+        faixa1 = Decimal('1412.00')
+        faixa2 = Decimal('2666.68')
+        faixa3 = Decimal('4000.03')
+
+        if salario > faixa1:
+            desconto += faixa1 * Decimal('0.075')
+        else:
+            return salario * Decimal('0.075')
+
+        if salario > faixa2:
+            desconto += (faixa2 - faixa1) * Decimal('0.09')
+        else:
+            return desconto + (salario - faixa1) * Decimal('0.09')
+
+        if salario > faixa3:
+            desconto += (faixa3 - faixa2) * Decimal('0.12')
+        else:
+            return desconto + (salario - faixa2) * Decimal('0.12')
+
+        return desconto + (salario - faixa3) * Decimal('0.14')
+
+    def calcular_irpf(self):
+        """Calcula o Imposto de Renda (Base - INSS)"""
+        salario = self.salario or Decimal(0)
+        inss = self.calcular_inss()
+        base_calculo = salario - inss
+        
+        if base_calculo <= Decimal('2259.20'):
+            return Decimal(0)
+        elif base_calculo <= Decimal('2826.65'):
+            return (base_calculo * Decimal('0.075')) - Decimal('169.44')
+        elif base_calculo <= Decimal('3751.05'):
+            return (base_calculo * Decimal('0.15')) - Decimal('381.44')
+        elif base_calculo <= Decimal('4664.68'):
+            return (base_calculo * Decimal('0.225')) - Decimal('662.77')
+        else:
+            return (base_calculo * Decimal('0.275')) - Decimal('896.00')
+
     @property
     def calculo_descontos(self):
-        """Simulação de descontos (ex: 11% de INSS + 6% VT = 17% fixo para exemplo)"""
-        if self.salario:
-            return self.salario * Decimal('0.17')
-        return Decimal('0.00')
+        """Total de descontos (INSS + IRPF)"""
+        return self.calcular_inss() + self.calcular_irpf()
+    
+    # Alias para manter compatibilidade com códigos anteriores que usam total_descontos
+    @property
+    def total_descontos(self):
+        return self.calculo_descontos
 
     @property
     def salario_liquido(self):
-        """Salário Bruto - Descontos"""
-        if self.salario:
-            return self.salario - self.calculo_descontos
-        return Decimal('0.00')
+        """Salário Bruto - Total de Descontos"""
+        return (self.salario or Decimal(0)) - self.calculo_descontos
