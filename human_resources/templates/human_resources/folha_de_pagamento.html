@@ -6,10 +6,16 @@
 {% block content %}
 <div class="container py-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2 class="page-title mb-0">Folha de Pagamento</h2>
-            <p class="text-muted">Cálculo de colaboradores ativos</p>
+        <div class="d-flex align-items-center gap-3">
+            <a href="{% url 'pessoal' %}" class="btn btn-outline-secondary btn-sm rounded-pill">
+                <i class="bi bi-arrow-left me-1"></i> Voltar
+            </a>
+            <div>
+                <h2 class="page-title mb-0">Folha de Pagamento</h2>
+                <p class="text-muted mb-0">Cálculo de colaboradores ativos</p>
+            </div>
         </div>
+        
         <div class="btn-group">
             <a href="{% url 'exportar_folha' 'pdf' %}" class="btn btn-danger"><i class="bi bi-file-pdf"></i> PDF</a>
             <a href="{% url 'exportar_folha' 'xls' %}" class="btn btn-success"><i class="bi bi-file-excel"></i> Excel</a>
@@ -21,7 +27,7 @@
         <div class="col-md-6">
             <div class="card bg-primary text-white shadow-sm">
                 <div class="card-body">
-                    <h5>Total Bruto</h5>
+                    <h5>Total Geral Bruto</h5>
                     <h3>R$ {{ total_bruto|floatformat:2 }}</h3>
                 </div>
             </div>
@@ -29,7 +35,7 @@
         <div class="col-md-6">
             <div class="card bg-success text-white shadow-sm">
                 <div class="card-body">
-                    <h5>Total Líquido a Pagar</h5>
+                    <h5>Total Geral Líquido</h5>
                     <h3>R$ {{ total_liquido|floatformat:2 }}</h3>
                 </div>
             </div>
@@ -45,7 +51,7 @@
                             <th class="ps-4">Colaborador</th>
                             <th>Cargo</th>
                             <th>Salário Bruto</th>
-                            <th class="text-danger">Descontos (Est.)</th>
+                            <th class="text-danger">Descontos</th>
                             <th class="text-success fw-bold">Salário Líquido</th>
                             <th>Status</th>
                         </tr>

@@ -10,6 +10,7 @@ from django.http import HttpResponse
 from django.template.loader import render_to_string
 from xhtml2pdf import pisa # Requer: pip install xhtml2pdf
 import openpyxl # Requer: pip install openpyxl
+from django.template.loader import render_to_string
 
 from .forms import FuncionarioForm
 from .models import Funcionario
@@ -127,7 +128,11 @@ def exportar_folha(request, formato):
     funcionarios = Funcionario.objects.filter(desligado=False)
     date_str = datetime.datetime.now().strftime("%Y-%m-%d")
     
-    # --- EXPORTAR EXCEL (XLS/XLSX) ---
+    # --- CÁLCULO DOS TOTAIS GERAIS ---
+    total_bruto = sum(f.salario for f in funcionarios if f.salario)
+    total_liquido = sum(f.salario_liquido for f in funcionarios if f.salario)
+    
+    # --- EXPORTAR EXCEL (XLS) ---
     if formato == 'xls':
         response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
         response['Content-Disposition'] = f'attachment; filename="Folha_Pagamento_{date_str}.xlsx"'
@@ -137,7 +142,7 @@ def exportar_folha(request, formato):
         ws.title = "Folha de Pagamento"
         
         # Cabeçalho
-        ws.append(['Nome', 'CPF', 'Cargo', 'Salário Bruto', 'Descontos (Est.)', 'Salário Líquido'])
+        ws.append(['Nome', 'CPF', 'Cargo', 'Salário Bruto', 'Descontos', 'Salário Líquido'])
         
         # Dados
         for f in funcionarios:
@@ -150,6 +155,10 @@ def exportar_folha(request, formato):
                 f.salario_liquido
             ])
             
+        # Linha de Totais (Pula uma linha e adiciona o total)
+        ws.append([]) 
+        ws.append(['TOTAIS GERAIS', '', '', total_bruto, '', total_liquido])
+            
         wb.save(response)
         return response
 
@@ -160,20 +169,30 @@ def exportar_folha(request, formato):
         
         lines = []
         lines.append(f"FOLHA DE PAGAMENTO - {date_str}\n")
-        lines.append("-" * 80 + "\n")
-        lines.append(f"{'NOME':<30} | {'CPF':<15} | {'BRUTO':<10} | {'DESC.':<10} | {'LÍQUIDO':<10}\n")
-        lines.append("-" * 80 + "\n")
+        lines.append("=" * 95 + "\n")
+        lines.append(f"{'NOME':<30} | {'CPF':<14} | {'BRUTO':<12} | {'DESC.':<12} | {'LÍQUIDO':<12}\n")
+        lines.append("-" * 95 + "\n")
         
         for f in funcionarios:
-            line = f"{f.nome_completo[:30]:<30} | {f.cpf:<15} | {f.salario:<10} | {f.calculo_descontos:<10} | {f.salario_liquido:<10}\n"
+            line = f"{f.nome_completo[:30]:<30} | {f.cpf:<14} | R$ {f.salario:<9} | R$ {f.calculo_descontos:<9} | R$ {f.salario_liquido:<9}\n"
             lines.append(line)
+            
+        lines.append("-" * 95 + "\n")
+        lines.append(f"{'TOTAIS GERAIS':<47} | R$ {total_bruto:<9} | {'':<12} | R$ {total_liquido:<9}\n")
             
         response.writelines(lines)
         return response
 
     # --- EXPORTAR PDF ---
     elif formato == 'pdf':
-        html_string = render_to_string('human_resources/folha_pdf_template.html', {'funcionarios': funcionarios})
+        # Passamos os totais para o template
+        context = {
+            'funcionarios': funcionarios,
+            'total_bruto': total_bruto,
+            'total_liquido': total_liquido
+        }
+        html_string = render_to_string('human_resources/folha_pdf_template.html', context)
+        
         response = HttpResponse(content_type='application/pdf')
         response['Content-Disposition'] = f'attachment; filename="Folha_Pagamento_{date_str}.pdf"'
         
