@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard | Business Stack{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <h2 class="page-title display-6 mb-2">Painel de Controle</h2>
+        <p class="lead text-muted" style="font-size: 1rem;">Selecione um módulo para gerenciar</p>
+    </div>
+    
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-4 justify-content-center">
+        
+        <div class="col">
+            <a href="{% url 'administrador' %}" class="module-card">
+                <img src="{% static 'img/pasta_adm.jpg' %}" alt="Aquisições e Talentos">
+                <span>Administrador</span>
+            </a>
+        </div>
+
+        <div class="col">
+            <a href="{% url 'financeiro' %}" class="module-card">
+                <img src="{% static 'img/pasta_financeiro.jpg' %}" alt="Benefícios">
+                <span>Financeiro</span>
+            </a>
+        </div>
+
+        <div class="col">
+            <a href="{% url 'pessoal' %}" class="module-card">
+                <img src="{% static 'img/pasta_pessoal.jpg' %}" alt="Cadastro de Funcionários">
+                <span>Pessoal</span>
+            </a>
+        </div>
+
+        <div class="col">
+            <a href="{% url 'suprimentos' %}" class="module-card">
+                <img src="{% static 'img/pasta_suprimentos.jpg' %}" alt="Capacitação">
+                <span>Suprimentos</span>
+            </a>
+        </div>
+
+        <div class="col">
+            <a href="{% url 'contabilidade' %}" class="module-card">
+                <img src="{% static 'img/pasta_contabilidade.jpg' %}" alt="Comunicação Interna">
+                <span>Contabilidade</span>
+            </a>
+        </div>
+
+        <div class="col">
+            <a href="{% url 'logistica' %}" class="module-card">
+                <img src="{% static 'img/pasta_logistica.jpg' %}" alt="Operações de RH">
+                <span>Logística</span>
+            </a>
+        </div>
+
+        <div class="col">
+            <a href="{% url 'auditoria' %}" class="module-card">
+                <img src="{% static 'img/pasta_auditoria.jpg' %}" alt="Saúde, Segurança e Meio Ambiente">
+                <span>Auditoria</span>
+            </a>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
