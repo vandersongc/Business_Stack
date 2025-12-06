@@ -13,6 +13,12 @@ import openpyxl
 from .forms import FuncionarioForm
 from .models import Funcionario
 
+# human_resources/views.py (Trecho principal atualizado)
+from decimal import Decimal
+from django.shortcuts import render, get_object_or_404
+from .models import Funcionario, LancamentoMensal, EventoFolha
+import datetime
+
 @login_required
 def home_rh(request):
     return render(request, 'home_rh.html')
@@ -163,4 +169,100 @@ def _get_contracheque_context(f):
     return {
         'f': f, 'inss': inss, 'irpf': irpf, 'base_irrf': base_irrf,
         'fgts': f.fgts_mes, 'mes_referencia': now.strftime("%m/%Y"), 'data_emissao': now
+    }
+
+# FUNÇÕES AUXILIARES DE CÁLCULO (Agora aceitam um valor base dinâmico)
+def calcular_inss_sobre_base(base_calculo):
+    teto = Decimal('7786.02')
+    if base_calculo > teto: return Decimal('908.85')
+    
+    desc = Decimal(0)
+    faixas = [
+        (Decimal('1412.00'), Decimal('0.075')),
+        (Decimal('2666.68'), Decimal('0.09')),
+        (Decimal('4000.03'), Decimal('0.12')),
+        (teto, Decimal('0.14'))
+    ]
+    base_anterior = Decimal(0)
+    for limite, aliquota in faixas:
+        if base_calculo > base_anterior:
+            base_faixa = min(base_calculo, limite) - base_anterior
+            desc += base_faixa * aliquota
+            base_anterior = limite
+        else:
+            break
+    return desc
+
+def calcular_irpf_sobre_base(base_tributavel):
+    # Tabela 2024/2025 simplificada
+    if base_tributavel <= Decimal('2259.20'): return Decimal(0)
+    elif base_tributavel <= Decimal('2826.65'): return (base_tributavel * Decimal('0.075')) - Decimal('169.44')
+    elif base_tributavel <= Decimal('3751.05'): return (base_tributavel * Decimal('0.15')) - Decimal('381.44')
+    elif base_tributavel <= Decimal('4664.68'): return (base_tributavel * Decimal('0.225')) - Decimal('662.77')
+    else: return (base_tributavel * Decimal('0.275')) - Decimal('896.00')
+
+def _get_contracheque_context(f):
+    now = datetime.datetime.now()
+    mes_ref = now.strftime("%m/%Y") # Ex: "12/2025"
+    
+    # 1. Recuperar eventos variáveis lançados para este mês
+    lancamentos = LancamentoMensal.objects.filter(funcionario=f, mes_referencia=mes_ref)
+    
+    # 2. Compor a lista de itens do holerite
+    itens_holerite = []
+    
+    # Adiciona Salário Base (Evento fixo)
+    itens_holerite.append({
+        'codigo': '001', 'descricao': 'SALARIO BASE', 'ref': '30d', 
+        'vencimento': f.salario, 'desconto': Decimal(0)
+    })
+    
+    total_vencimentos = f.salario or Decimal(0)
+    total_descontos = Decimal(0)
+    base_inss = f.salario or Decimal(0)
+    
+    # Processa lançamentos variáveis (ex: Hora Extra)
+    for l in lancamentos:
+        if l.evento.tipo == 'V':
+            itens_holerite.append({'codigo': l.evento.codigo, 'descricao': l.evento.nome, 'ref': l.quantidade or '-', 'vencimento': l.valor, 'desconto': 0})
+            total_vencimentos += l.valor
+            if l.evento.incide_inss: base_inss += l.valor
+        else:
+            itens_holerite.append({'codigo': l.evento.codigo, 'descricao': l.evento.nome, 'ref': l.quantidade or '-', 'vencimento': 0, 'desconto': l.valor})
+            total_descontos += l.valor
+
+    # 3. Calcular Impostos Dinamicamente
+    val_inss = calcular_inss_sobre_base(base_inss)
+    if val_inss > 0:
+        itens_holerite.append({'codigo': '901', 'descricao': 'INSS', 'ref': 'Tab.', 'vencimento': 0, 'desconto': val_inss})
+        total_descontos += val_inss
+
+    base_irrf = base_inss - val_inss # Simplificado (sem dependentes por enqto)
+    val_irrf = calcular_irpf_sobre_base(base_irrf)
+    if val_irrf > 0:
+        itens_holerite.append({'codigo': '911', 'descricao': 'IRRF', 'ref': 'Tab.', 'vencimento': 0, 'desconto': val_irrf})
+        total_descontos += val_irrf
+
+    # Adicionar descontos fixos antigos (Vale transporte etc) para não perder lógica
+    # Idealmente, você migraria isso para EventoFolha com o tempo
+    fixos = [
+        ('920', 'VALE TRANSPORTE', f.desc_vale_transporte),
+        ('921', 'VALE ALIMENTACAO', f.desc_vale_alimentacao),
+        ('922', 'ASSIST. MEDICA', f.desc_assist_medica)
+    ]
+    for cod, desc, val in fixos:
+        if val > 0:
+            itens_holerite.append({'codigo': cod, 'descricao': desc, 'ref': '-', 'vencimento': 0, 'desconto': val})
+            total_descontos += val
+
+    liquido = total_vencimentos - total_descontos
+
+    return {
+        'f': f,
+        'mes_referencia': mes_ref,
+        'itens_holerite': itens_holerite,
+        'total_vencimentos': total_vencimentos,
+        'total_descontos': total_descontos,
+        'liquido': liquido,
+        'bases': {'inss': base_inss, 'fgts': base_inss, 'irrf': base_irrf}
     }
