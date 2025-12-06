@@ -1,118 +1,42 @@
 {% extends 'base.html' %}
-{% load static %}
-
-{% block title %}Holerite Digital{% endblock %}
-
 {% block content %}
 <div class="container py-5">
-    
-    <div class="d-flex justify-content-between mb-4 print-hide">
-        <a href="{% url 'consulta_contracheque' %}" class="btn btn-outline-secondary rounded-pill">
-            <i class="bi bi-arrow-left"></i> Voltar
-        </a>
-        <a href="{% url 'gerar_contracheque_pdf' f.id %}" class="btn btn-danger rounded-pill fw-bold">
-            <i class="bi bi-file-pdf"></i> Baixar PDF Oficial
-        </a>
+    <div class="d-flex justify-content-between mb-4">
+        <a href="{% url 'consulta_contracheque' %}" class="btn btn-outline-secondary rounded-pill">Voltar</a>
+        <a href="{% url 'gerar_contracheque_pdf' f.id %}" class="btn btn-danger rounded-pill">Baixar PDF</a>
     </div>
-
-    <div class="card shadow-lg border-0" style="max-width: 900px; margin: 0 auto;">
-        <div class="card-body p-5">
-            
-            <div class="row mb-4 border-bottom pb-3">
-                <div class="col-8">
-                    <h4 class="fw-bold">BUSINESS STACK EMPRESARIAL</h4>
-                    <small class="text-muted">CNPJ: 00.000.000/0001-00</small><br>
-                    <small class="text-muted">Rua da Tecnologia, 1000</small>
-                </div>
-                <div class="col-4 text-end">
-                    <h5 class="fw-bold">RECIBO DE PAGAMENTO</h5>
-                    <span class="badge bg-light text-dark border">Ref: {{ mes_referencia }}</span>
-                </div>
+    <div class="card shadow-lg p-5 mx-auto" style="max-width: 900px;">
+        <div class="row border-bottom pb-3 mb-3">
+            <div class="col-8"><h4>BUSINESS STACK</h4><small>CNPJ: 00.000.000/0001-00</small></div>
+            <div class="col-4 text-end"><h5>RECIBO DE PAGAMENTO</h5><span class="badge bg-light text-dark border">{{ mes_referencia }}</span></div>
+        </div>
+        <div class="row bg-light p-3 mb-3">
+            <div class="col-6"><small>COLABORADOR</small><div>{{ f.nome_completo }}</div></div>
+            <div class="col-3"><small>CARGO</small><div>{{ f.cargo }}</div></div>
+            <div class="col-3"><small>LOTAÇÃO</small><div>{{ f.lotacao|default:'-' }}</div></div>
+        </div>
+        <table class="table table-bordered">
+            <thead class="table-secondary"><tr><th>Cód</th><th>Descrição</th><th>Ref.</th><th class="text-end">Vencimentos</th><th class="text-end">Descontos</th></tr></thead>
+            <tbody>
+                <tr><td>001</td><td>Salário Base</td><td>30d</td><td class="text-end">{{ f.salario }}</td><td></td></tr>
+                <tr><td>901</td><td>INSS</td><td>Tab.</td><td></td><td class="text-end">{{ inss|floatformat:2 }}</td></tr>
+                {% if irpf > 0 %}<tr><td>911</td><td>IRRF</td><td>Tab.</td><td></td><td class="text-end">{{ irpf|floatformat:2 }}</td></tr>{% endif %}
+                {% if f.desc_vale_transporte > 0 %}<tr><td>920</td><td>Vale Transporte</td><td>-</td><td></td><td class="text-end">{{ f.desc_vale_transporte }}</td></tr>{% endif %}
+                {% if f.desc_vale_alimentacao > 0 %}<tr><td>921</td><td>Vale Alimentação</td><td>-</td><td></td><td class="text-end">{{ f.desc_vale_alimentacao }}</td></tr>{% endif %}
+            </tbody>
+            <tfoot class="fw-bold">
+                <tr><td colspan="3" class="text-end">TOTAIS</td><td class="text-end">{{ f.salario }}</td><td class="text-end text-danger">{{ f.total_descontos|floatformat:2 }}</td></tr>
+            </tfoot>
+        </table>
+        <div class="row mt-4">
+            <div class="col-8 p-3 border bg-light">
+                <small class="d-block fw-bold">BASES</small>
+                <span class="me-3">FGTS Mês: {{ fgts|floatformat:2 }}</span>
+                <span>Base IRRF: {{ base_irrf|floatformat:2 }}</span>
             </div>
-
-            <div class="row mb-4 bg-light p-3 rounded mx-0">
-                <div class="col-md-6">
-                    <small class="text-muted fw-bold">COLABORADOR</small>
-                    <div class="fs-5">{{ f.nome_completo }}</div>
-                </div>
-                <div class="col-md-3">
-                    <small class="text-muted fw-bold">CPF</small>
-                    <div>{{ f.cpf }}</div>
-                </div>
-                <div class="col-md-3">
-                    <small class="text-muted fw-bold">CARGO</small>
-                    <div>{{ f.cargo }}</div>
-                </div>
-            </div>
-
-            <table class="table table-bordered border-secondary mb-0">
-                <thead class="table-secondary">
-                    <tr class="text-center small text-uppercase">
-                        <th style="width: 10%;">Cód</th>
-                        <th style="width: 40%; text-align: left;">Descrição</th>
-                        <th style="width: 10%;">Ref.</th>
-                        <th style="width: 20%;">Vencimentos</th>
-                        <th style="width: 20%;">Descontos</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td class="text-center">001</td>
-                        <td>Salário Base</td>
-                        <td class="text-center">30d</td>
-                        <td class="text-end">R$ {{ f.salario|floatformat:2 }}</td>
-                        <td class="text-end">0,00</td>
-                    </tr>
-                    
-                    <tr>
-                        <td class="text-center">901</td>
-                        <td>INSS (Previdência)</td>
-                        <td class="text-center">%</td>
-                        <td class="text-end">0,00</td>
-                        <td class="text-end text-danger">R$ {{ inss|floatformat:2 }}</td>
-                    </tr>
-
-                    {% if irpf > 0 %}
-                    <tr>
-                        <td class="text-center">911</td>
-                        <td>IRRF (Imposto de Renda)</td>
-                        <td class="text-center">%</td>
-                        <td class="text-end">0,00</td>
-                        <td class="text-end text-danger">R$ {{ irpf|floatformat:2 }}</td>
-                    </tr>
-                    {% endif %}
-
-                    <tr style="height: 100px;"><td colspan="5"></td></tr>
-                </tbody>
-                <tfoot class="fw-bold bg-light">
-                    <tr>
-                        <td colspan="3" class="text-end">TOTAIS</td>
-                        <td class="text-end">R$ {{ f.salario|floatformat:2 }}</td>
-                        <td class="text-end text-danger">R$ {{ total_descontos|floatformat:2 }}</td>
-                    </tr>
-                </tfoot>
-            </table>
-
-            <div class="row mt-4">
-                <div class="col-md-8">
-                    <div class="p-3 border rounded bg-light h-100">
-                        <small class="fw-bold d-block mb-2">BASES DE CÁLCULO</small>
-                        <div class="d-flex justify-content-between small text-muted">
-                            <span>Base FGTS: R$ {{ f.salario|floatformat:2 }}</span>
-                            <span>FGTS do Mês: R$ {{ f.salario|floatformat:2 }}</span> <span>Base IRRF: R$ {{ f.salario|floatformat:2 }}</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="p-3 border rounded bg-success bg-opacity-10 border-success h-100 text-end">
-                        <small class="text-success fw-bold">LÍQUIDO A RECEBER</small>
-                        <div class="fs-3 fw-bold text-success">R$ {{ f.salario_liquido|floatformat:2 }}</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="text-center mt-5 text-muted fst-italic small">
-                <p>Pagamento efetuado em: {{ data_emissao|date:"d/m/Y" }}</p>
+            <div class="col-4 p-3 border bg-success bg-opacity-10 text-end">
+                <small class="text-success fw-bold">LÍQUIDO</small>
+                <div class="fs-3 fw-bold text-success">{{ f.salario_liquido|floatformat:2 }}</div>
             </div>
         </div>
     </div>

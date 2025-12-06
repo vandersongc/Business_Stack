@@ -1,83 +1,32 @@
 {% extends 'base.html' %}
-{% load static %}
-
 {% block title %}Folha de Pagamento{% endblock %}
-
 {% block content %}
 <div class="container py-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div class="d-flex align-items-center gap-3">
-            <a href="{% url 'pessoal' %}" class="btn btn-outline-secondary btn-sm rounded-pill">
-                <i class="bi bi-arrow-left me-1"></i> Voltar
-            </a>
-            <div>
-                <h2 class="page-title mb-0">Folha de Pagamento</h2>
-                <p class="text-muted mb-0">Cálculo de colaboradores ativos</p>
-            </div>
+            <a href="{% url 'pessoal' %}" class="btn btn-outline-secondary btn-sm rounded-pill"><i class="bi bi-arrow-left"></i> Voltar</a>
+            <h2 class="page-title mb-0">Folha de Pagamento</h2>
         </div>
-        
         <div class="btn-group">
-            <a href="{% url 'exportar_folha' 'pdf' %}" class="btn btn-danger"><i class="bi bi-file-pdf"></i> PDF</a>
-            <a href="{% url 'exportar_folha' 'xls' %}" class="btn btn-success"><i class="bi bi-file-excel"></i> Excel</a>
-            <a href="{% url 'exportar_folha' 'txt' %}" class="btn btn-secondary"><i class="bi bi-file-text"></i> TXT</a>
+            <a href="{% url 'exportar_folha' 'pdf' %}" class="btn btn-danger">PDF</a>
+            <a href="{% url 'exportar_folha' 'xls' %}" class="btn btn-success">Excel</a>
+            <a href="{% url 'exportar_folha' 'txt' %}" class="btn btn-secondary">TXT</a>
         </div>
     </div>
-
     <div class="row mb-4">
-        <div class="col-md-6">
-            <div class="card bg-primary text-white shadow-sm">
-                <div class="card-body">
-                    <h5>Total Geral Bruto</h5>
-                    <h3>R$ {{ total_bruto|floatformat:2 }}</h3>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="card bg-success text-white shadow-sm">
-                <div class="card-body">
-                    <h5>Total Geral Líquido</h5>
-                    <h3>R$ {{ total_liquido|floatformat:2 }}</h3>
-                </div>
-            </div>
-        </div>
+        <div class="col-md-6"><div class="card bg-primary text-white p-3"><h5>Total Bruto</h5><h3>R$ {{ total_bruto|floatformat:2 }}</h3></div></div>
+        <div class="col-md-6"><div class="card bg-success text-white p-3"><h5>Total Líquido</h5><h3>R$ {{ total_liquido|floatformat:2 }}</h3></div></div>
     </div>
-
-    <div class="card border-0 shadow-sm rounded-4">
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="table-light">
-                        <tr>
-                            <th class="ps-4">Colaborador</th>
-                            <th>Cargo</th>
-                            <th>Salário Bruto</th>
-                            <th class="text-danger">Descontos (Est.)</th>
-                            <th class="text-success fw-bold">Salário Líquido</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for func in funcionarios %}
-                        <tr>
-                            <td class="ps-4">
-                                <div class="fw-bold">{{ func.nome_completo }}</div>
-                                <small class="text-muted">{{ func.cpf }}</small>
-                            </td>
-                            <td>{{ func.cargo }}</td>
-                            <td>R$ {{ func.salario }}</td>
-                            <td class="text-danger">- R$ {{ func.calculo_descontos|floatformat:2 }}</td>
-                            <td class="text-success fw-bold">R$ {{ func.salario_liquido|floatformat:2 }}</td>
-                            <td><span class="badge bg-success">Ativo</span></td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="6" class="text-center py-4">Nenhum colaborador ativo encontrado.</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
+    <div class="card border-0 shadow-sm rounded-4"><div class="card-body p-0"><div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead class="table-light"><tr><th class="ps-4">Nome</th><th>Cargo</th><th>Bruto</th><th>Descontos</th><th>Líquido</th></tr></thead>
+            <tbody>
+                {% for f in funcionarios %}
+                <tr><td class="ps-4">{{ f.nome_completo }}</td><td>{{ f.cargo }}</td><td>R$ {{ f.salario }}</td><td class="text-danger">R$ {{ f.total_descontos|floatformat:2 }}</td><td class="text-success fw-bold">R$ {{ f.salario_liquido|floatformat:2 }}</td></tr>
+                {% empty %}<tr><td colspan="5" class="text-center py-4">Nenhum ativo.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div></div></div>
 </div>
 {% endblock %}

@@ -1,128 +1,66 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8">
-    <style>
-        @page { size: A4; margin: 1cm; }
-        body { font-family: Helvetica, Arial, sans-serif; font-size: 11px; color: #000; }
-        
-        .box { border: 1px solid #000; margin-bottom: 10px; padding: 5px; }
-        
-        table { width: 100%; border-collapse: collapse; }
-        th, td { padding: 4px; text-align: left; }
-        
-        .col-money { text-align: right; width: 15%; }
-        .col-code { width: 10%; text-align: center; }
-        .col-desc { width: 45%; }
-        .col-ref { width: 15%; text-align: center; }
-        
-        .footer-msg { font-size: 9px; text-align: center; margin-top: 20px; font-style: italic; }
-        
-        .total-box { background-color: #eee; font-weight: bold; border-top: 1px solid #000; }
-    </style>
+<meta charset="utf-8">
+<style>
+    @page { size: A4; margin: 1cm; }
+    body { font-family: Helvetica, Arial, sans-serif; font-size: 10px; }
+    .container { border: 1px solid #000; }
+    table { width: 100%; border-collapse: collapse; }
+    td { padding: 3px; }
+    .header-table { border-bottom: 1px solid #000; }
+    .main-table th { border-top: 1px solid #000; border-bottom: 1px solid #000; text-align: left; }
+    .footer-table { border-top: 1px solid #000; }
+    .right { text-align: right; }
+</style>
 </head>
 <body>
-
-    <div class="box">
-        <table style="width: 100%;">
-            <tr>
-                <td width="70%">
-                    <strong>BUSINESS STACK EMPRESARIAL LTDA</strong><br>
-                    CNPJ: 00.000.000/0001-00<br>
-                    Rua da Tecnologia, 1000 - Digital Valley
-                </td>
-                <td width="30%" style="text-align: right; vertical-align: top;">
-                    <strong>RECIBO DE PAGAMENTO</strong><br>
-                    Referência: {{ mes_referencia }}
-                </td>
-            </tr>
-        </table>
-    </div>
-
-    <div class="box">
-        <table style="width: 100%;">
-            <tr>
-                <td width="10%"><strong>Cód:</strong><br>{{ f.id }}</td>
-                <td width="40%"><strong>Nome do Colaborador:</strong><br>{{ f.nome_completo }}</td>
-                <td width="25%"><strong>CBO/Cargo:</strong><br>{{ f.cargo }}</td>
-                <td width="25%"><strong>Departamento:</strong><br>{{ f.departamento }}</td>
-            </tr>
-        </table>
-    </div>
-
-    <div class="box" style="min-height: 300px;">
-        <table>
-            <thead>
-                <tr style="border-bottom: 1px solid #000;">
-                    <th class="col-code">Cód.</th>
-                    <th class="col-desc">Descrição</th>
-                    <th class="col-ref">Ref.</th>
-                    <th class="col-money">Vencimentos</th>
-                    <th class="col-money">Descontos</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td class="col-code">001</td>
-                    <td>Salário Base</td>
-                    <td class="col-ref">30d</td>
-                    <td class="col-money">{{ f.salario|floatformat:2 }}</td>
-                    <td class="col-money">0,00</td>
-                </tr>
-                
-                <tr>
-                    <td class="col-code">901</td>
-                    <td>INSS (Previdência Social)</td>
-                    <td class="col-ref">Tab.</td>
-                    <td class="col-money">0,00</td>
-                    <td class="col-money">{{ inss|floatformat:2 }}</td>
-                </tr>
-
-                {% if irpf > 0 %}
-                <tr>
-                    <td class="col-code">911</td>
-                    <td>IRRF (Imposto de Renda)</td>
-                    <td class="col-ref">Tab.</td>
-                    <td class="col-money">0,00</td>
-                    <td class="col-money">{{ irpf|floatformat:2 }}</td>
-                </tr>
-                {% endif %}
-            </tbody>
-        </table>
-    </div>
-
-    <div class="box total-box">
-        <table>
-            <tr>
-                <td colspan="3" style="text-align: right;">TOTAIS:</td>
-                <td class="col-money">{{ f.salario|floatformat:2 }}</td>
-                <td class="col-money">{{ total_descontos|floatformat:2 }}</td>
-            </tr>
-        </table>
-    </div>
-
-    <div class="box">
-        <table style="width: 100%;">
-            <tr>
-                <td width="70%">
-                    <strong>Salário Base:</strong> R$ {{ f.salario|floatformat:2 }}
-                    &nbsp;&nbsp;|&nbsp;&nbsp;
-                    <strong>Base Calc. INSS:</strong> R$ {{ f.salario|floatformat:2 }}
-                    &nbsp;&nbsp;|&nbsp;&nbsp;
-                    <strong>Base Calc. FGTS:</strong> R$ {{ f.salario|floatformat:2 }}
-                </td>
-                <td width="30%" style="border: 1px solid #000; padding: 10px; text-align: right; background-color: #ddd;">
-                    <small>LÍQUIDO A RECEBER</small><br>
-                    <strong style="font-size: 14px;">R$ {{ f.salario_liquido|floatformat:2 }}</strong>
-                </td>
-            </tr>
-        </table>
-    </div>
-
-    <div class="footer-msg">
-        Declaramos ter recebido a importância líquida discriminada neste recibo.<br>
-        Data: {{ hoje|date:"d/m/Y" }} &nbsp;&nbsp;&nbsp;&nbsp; Assinatura: ____________________________________________________
-    </div>
-
+<div class="container">
+    <table class="header-table">
+        <tr>
+            <td width="60%"><strong>BUSINESS STACK S.A.</strong><br>CNPJ: 00.000.000/0001-00</td>
+            <td width="40%" class="right"><strong>RECIBO DE PAGAMENTO</strong><br>Ref: {{ mes_referencia }} | Mensal</td>
+        </tr>
+    </table>
+    <table>
+        <tr>
+            <td width="10%"><strong>ID</strong><br>{{ f.id }}</td>
+            <td width="40%"><strong>NOME</strong><br>{{ f.nome_completo|upper }}</td>
+            <td width="25%"><strong>CARGO</strong><br>{{ f.cargo|upper }}</td>
+            <td width="25%"><strong>LOTAÇÃO</strong><br>{{ f.lotacao|default:"-"|upper }}</td>
+        </tr>
+        <tr>
+            <td colspan="4"><strong>BANCO/AG/CONTA:</strong> {{ f.banco|default:"-" }} / {{ f.agencia|default:"-" }} / {{ f.conta|default:"-" }}</td>
+        </tr>
+    </table>
+    <table class="main-table">
+        <thead><tr><th>Cód.</th><th>Descrição</th><th>Ref.</th><th class="right">Vencimentos</th><th class="right">Descontos</th></tr></thead>
+        <tbody>
+            <tr><td>001</td><td>SALARIO</td><td>30d</td><td class="right">{{ f.salario|floatformat:2 }}</td><td></td></tr>
+            <tr><td>901</td><td>INSS</td><td>Tab.</td><td></td><td class="right">{{ inss|floatformat:2 }}</td></tr>
+            {% if irpf > 0 %}<tr><td>911</td><td>IRRF</td><td>Tab.</td><td></td><td class="right">{{ irpf|floatformat:2 }}</td></tr>{% endif %}
+            {% if f.desc_vale_transporte > 0 %}<tr><td>920</td><td>VALE TRANSPORTE</td><td>-</td><td></td><td class="right">{{ f.desc_vale_transporte }}</td></tr>{% endif %}
+            {% if f.desc_vale_alimentacao > 0 %}<tr><td>921</td><td>VALE ALIMENTACAO</td><td>-</td><td></td><td class="right">{{ f.desc_vale_alimentacao }}</td></tr>{% endif %}
+            {% if f.desc_assist_medica > 0 %}<tr><td>922</td><td>ASS. MEDICA</td><td>-</td><td></td><td class="right">{{ f.desc_assist_medica }}</td></tr>{% endif %}
+            {% if f.desc_assist_odonto > 0 %}<tr><td>923</td><td>ASS. ODONTO</td><td>-</td><td></td><td class="right">{{ f.desc_assist_odonto }}</td></tr>{% endif %}
+            <tr style="height: 100px;"><td colspan="5"></td></tr>
+        </tbody>
+    </table>
+    <table class="footer-table" style="background-color: #eee;">
+        <tr><td width="60%"></td><td width="20%">TOTAIS</td><td width="10%" class="right">{{ f.salario|floatformat:2 }}</td><td width="10%" class="right">{{ f.total_descontos|floatformat:2 }}</td></tr>
+    </table>
+    <table class="footer-table">
+        <tr><td width="70%">LÍQUIDO A RECEBER -></td><td width="30%" class="right" style="border:1px solid #000;"><strong>R$ {{ f.salario_liquido|floatformat:2 }}</strong></td></tr>
+    </table>
+    <table>
+        <tr>
+            <td>Sal. Base: {{ f.salario }}</td><td>Base INSS: {{ f.salario }}</td><td>Base FGTS: {{ f.salario }}</td><td>FGTS Mês: {{ fgts|floatformat:2 }}</td><td>Base IRRF: {{ base_irrf|floatformat:2 }}</td>
+        </tr>
+    </table>
+</div>
+<div style="text-align: center; font-size: 9px; margin-top: 20px;">
+    Declaro ter recebido a importância líquida discriminada neste recibo.<br><br>
+    _____/_____/__________ ________________________________________________________
+</div>
 </body>
 </html>
