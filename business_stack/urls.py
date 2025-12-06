@@ -21,6 +21,8 @@ urlpatterns = [
     path('cadastro_funcionarios/', rh_views.cadastro_funcionario, name='cadastro_funcionarios'),
     path('folha_pagamento/', rh_views.folha_pagamento, name='folha_pagamento'),
     path('exportar_folha/<str:formato>/', rh_views.exportar_folha, name='exportar_folha'),
+    path('contracheque/', rh_views.consulta_contracheque, name='consulta_contracheque'),
+    path('contracheque/pdf/<int:funcionario_id>/', rh_views.gerar_contracheque_pdf, name='gerar_contracheque_pdf'),
     # ----------------------------------
     
     # Rotas dos Módulos (seus outros links)

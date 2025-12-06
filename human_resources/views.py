@@ -202,3 +202,43 @@ def exportar_folha(request, formato):
         return response
 
     return redirect('folha_pagamento')
+
+    # ContraCheque
+
+@login_required
+def consulta_contracheque(request):
+    # --- Lógica de Busca (Reaproveitando padrão) ---
+    termo_busca = request.GET.get('termo_busca')
+    resultados = None
+    
+    if termo_busca:
+        resultados = Funcionario.objects.filter(
+            Q(nome_completo__icontains=termo_busca) | Q(cpf__icontains=termo_busca),
+            desligado=False # Apenas ativos
+        )
+    
+    return render(request, 'human_resources/consulta_contracheque.html', {
+        'resultados': resultados,
+        'termo_busca': termo_busca
+    })
+
+@login_required
+def gerar_contracheque_pdf(request, funcionario_id):
+    funcionario = get_object_or_404(Funcionario, pk=funcionario_id)
+    date_str = datetime.datetime.now()
+    
+    context = {
+        'f': funcionario,
+        'hoje': date_str,
+        'mes_referencia': date_str.strftime("%m/%Y")
+    }
+    
+    html_string = render_to_string('human_resources/contracheque_pdf_template.html', context)
+    response = HttpResponse(content_type='application/pdf')
+    filename = f"Contracheque_{funcionario.nome_completo.replace(' ', '_')}_{date_str.strftime('%Y_%m')}.pdf"
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+    
+    pisa_status = pisa.CreatePDF(html_string, dest=response)
+    if pisa_status.err:
+        return HttpResponse('Erro ao gerar PDF', status=500)
+    return response
