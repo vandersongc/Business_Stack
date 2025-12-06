@@ -2,6 +2,20 @@ from django.db import models
 
 class Funcionario(models.Model):
     # --- Opções de escolha (Dropdowns) ---
+
+    ESTADO_CIVIL_CHOICES = [
+        ('solteiro', 'Solteiro(a)'),
+        ('casado', 'Casado(a)'),
+        ('divorciado', 'Divorciado(a)'),
+        ('viuvo', 'Viúvo(a)'),
+    ]
+
+    TIPO_CONTRATO_CHOICES = [
+        ('clt', 'CLT'),
+        ('pj', 'PJ'),
+        ('estagio', 'Estágio'),
+    ]
+
     DEPARTAMENTOS_CHOICES = [
         ('TI', 'Tecnologia da Informação'),
         ('RH', 'Recursos Humanos'),
@@ -25,38 +39,31 @@ class Funcionario(models.Model):
         ('SP', 'São Paulo'), ('SE', 'Sergipe'), ('TO', 'Tocantins'),
     ]
 
-    # --- Dados Pessoais e Profissionais ---
-    nome = models.CharField(max_length=100, verbose_name="Nome Completo")
-    cargo = models.CharField(max_length=100, verbose_name="Cargo")
-    
-    # Aqui usamos o choices para criar o Dropdown no formulário
-    departamento = models.CharField(
-        max_length=3, 
-        choices=DEPARTAMENTOS_CHOICES, 
-        default='RH',
-        verbose_name="Departamento"
-    )
-    
-    data_admissao = models.DateField(verbose_name="Data de Admissão")
-    salario = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Salário")
+    # --- Dados Pessoais ---
+    nome_completo = models.CharField(max_length=200, verbose_name="Nome Completo")
+    cpf = models.CharField(max_length=14, verbose_name="CPF", unique=True)
+    data_nascimento = models.DateField(verbose_name="Data de Nascimento")
+    email = models.EmailField(verbose_name="E-mail Pessoal", blank=True, null=True)
+    telefone = models.CharField(max_length=20, verbose_name="Telefone", blank=True, null=True)
+    estado_civil = models.CharField(max_length=20, choices=ESTADO_CIVIL_CHOICES, verbose_name="Estado Civil", blank=True, null=True)
 
-    # --- Endereço (Integração com ViaCEP) ---
-    cep = models.CharField(max_length=9, verbose_name="CEP")
-    logradouro = models.CharField(max_length=100, verbose_name="Endereço", blank=True)
-    numero = models.CharField(max_length=10, verbose_name="Número", blank=True)
-    bairro = models.CharField(max_length=50, verbose_name="Bairro", blank=True)
-    cidade = models.CharField(max_length=50, verbose_name="Cidade", blank=True)
-    
-    # Dropdown também para o Estado (UF)
-    uf = models.CharField(
-        max_length=2, 
-        choices=UF_CHOICES, 
-        verbose_name="Estado", 
-        blank=True
-    )
+    # --- Dados Contratuais ---
+    cargo = models.CharField(max_length=100, verbose_name="Cargo")
+    departamento = models.CharField(max_length=100, verbose_name="Departamento")
+    data_admissao = models.DateField(verbose_name="Data de Admissão")
+    salario = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Salário", blank=True, null=True)
+    tipo_contrato = models.CharField(max_length=20, choices=TIPO_CONTRATO_CHOICES, verbose_name="Tipo de Contrato", default='clt')
+
+    # --- Endereço ---
+    cep = models.CharField(max_length=10, verbose_name="CEP", blank=True, null=True)
+    logradouro = models.CharField(max_length=200, verbose_name="Endereço", blank=True, null=True)
+    numero = models.CharField(max_length=10, verbose_name="Número", blank=True, null=True)
+    bairro = models.CharField(max_length=100, verbose_name="Bairro", blank=True, null=True)
+    cidade = models.CharField(max_length=100, verbose_name="Cidade", blank=True, null=True)
+    uf = models.CharField(max_length=2, verbose_name="UF", blank=True, null=True)
 
     # Registro de sistema
     criado_em = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.nome
+        return self.nome_completo
