@@ -9,17 +9,16 @@ urlpatterns = [
     
     path('', home_views.home, name='home'),
     
-    # Rotas de Autenticação
+    # Rota de cadastro
     path('cadastro/', home_views.cadastro, name='cadastro'),
     
-    # --- CORREÇÃO AQUI: Use .login_view em vez de .login ---
+    # --- Rotas de Login e Logout ---
     path('login/', home_views.login_view, name='login'),
-    # -------------------------------------------------------
-    
     path('logout/', home_views.logout_view, name='logout'),
 
-   
+     # --- Rotas de RH ---
     path('pessoal/', rh_views.home_rh, name='pessoal'), 
+    path('cadastro_funcionarios/', rh_views.cadastro_funcionario, name='cadastro_funcionarios'),
     
 
     # Rotas dos Módulos (seus outros links)
