@@ -1,128 +1,195 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Novo Colaborador | RH{% endblock %}
+{% block title %}Gestão de Colaboradores | RH{% endblock %}
 
 {% block content %}
 <div class="container py-5">
+    
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="page-title mb-0">Cadastro de Colaborador</h2>
+        <h2 class="page-title mb-0">Gestão de Colaboradores</h2>
         <a href="{% url 'pessoal' %}" class="btn btn-outline-secondary btn-sm rounded-pill">
             <i class="bi bi-arrow-left me-1"></i> Voltar
         </a>
     </div>
 
-    <div class="card border-0 shadow-sm rounded-4">
+    <div class="card border-0 shadow-sm rounded-4 mb-5">
+        <div class="card-body p-4" style="background-color: #f8f9fa;">
+            <h5 class="text-primary fw-bold mb-3"><i class="bi bi-search me-2"></i>Consultar Funcionário</h5>
+            
+            <form method="get" class="row g-3 align-items-end">
+                <div class="col-md-8">
+                    <label class="form-label fw-bold text-muted">Buscar por Nome Completo ou CPF</label>
+                    <input type="text" name="termo_busca" class="form-control" 
+                           placeholder="Digite o nome ou CPF..." value="{{ termo_busca|default:'' }}">
+                </div>
+                <div class="col-md-4 d-flex gap-2">
+                    <button type="submit" class="btn btn-info text-white fw-bold flex-grow-1">
+                        <i class="bi bi-search me-2"></i> Consultar
+                    </button>
+                    
+                    {% if termo_busca or id_editar %}
+                    <a href="{% url 'cadastro_funcionarios' %}" class="btn btn-secondary fw-bold">
+                        <i class="bi bi-x-lg me-1"></i> Limpar
+                    </a>
+                    {% endif %}
+                </div>
+            </form>
+
+            {% if resultados %}
+                <div class="table-responsive mt-4">
+                    <table class="table table-hover align-middle bg-white rounded shadow-sm">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Nome</th>
+                                <th>CPF</th>
+                                <th>Cargo</th>
+                                <th>Departamento</th>
+                                <th class="text-end">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for func in resultados %}
+                            <tr>
+                                <td>{{ func.nome_completo }}</td>
+                                <td>{{ func.cpf }}</td>
+                                <td>{{ func.cargo }}</td>
+                                <td>{{ func.departamento }}</td>
+                                <td class="text-end">
+                                    <a href="?termo_busca={{ termo_busca }}&id_editar={{ func.id }}#formulario_anchor" 
+                                       class="btn btn-sm btn-outline-primary fw-bold">
+                                        <i class="bi bi-pencil-square me-1"></i> Editar
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% elif termo_busca %}
+                <div class="alert alert-warning mt-3">
+                    Nenhum funcionário encontrado com "{{ termo_busca }}".
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div id="formulario_anchor"></div>
+
+    <div class="card border-0 shadow-sm rounded-4 {% if id_editar %}border border-primary{% endif %}">
+        <div class="card-header bg-white border-0 pt-4 px-4 px-md-5 d-flex justify-content-between align-items-center">
+            
+            {% if id_editar %}
+                <div class="text-primary">
+                    <h4 class="fw-bold mb-0"><i class="bi bi-pencil-fill me-2"></i>Editando: {{ funcionario_editando.nome_completo }}</h4>
+                    <small class="text-muted">Altere os dados abaixo e clique em Salvar</small>
+                </div>
+                <a href="{% url 'cadastro_funcionarios' %}" class="btn btn-sm btn-outline-danger">Cancelar Edição</a>
+            {% else %}
+                <h4 class="text-primary fw-bold mb-0"><i class="bi bi-person-plus-fill me-2"></i>Novo Cadastro</h4>
+            {% endif %}
+            
+        </div>
+        
         <div class="card-body p-4 p-md-5">
             <form method="post">
                 {% csrf_token %}
                 
-                <h5 class="text-primary fw-bold mb-3"><i class="bi bi-person-lines-fill me-2"></i>Dados Pessoais</h5>
+                <h5 class="text-secondary fw-bold mb-3 small text-uppercase ls-1">Dados Pessoais</h5>
                 <div class="row g-3 mb-4">
                     <div class="col-md-6">
                         <label class="form-label fw-bold">Nome Completo</label>
-                        <input type="text" name="nome_completo" class="form-control" required>
+                        {{ form.nome_completo }}
                     </div>
                     <div class="col-md-3">
                         <label class="form-label fw-bold">CPF</label>
-                        <input type="text" name="cpf" class="form-control" placeholder="000.000.000-00" required>
+                        {{ form.cpf }}
                     </div>
                     <div class="col-md-3">
                         <label class="form-label fw-bold">Data de Nascimento</label>
-                        <input type="date" name="data_nascimento" class="form-control" required>
+                        <input type="date" name="data_nascimento" class="form-control" 
+                               value="{{ form.data_nascimento.value|date:'Y-m-d'|default:'' }}" required>
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label fw-bold">E-mail Pessoal</label>
-                        <input type="email" name="email" class="form-control">
+                        <label class="form-label fw-bold">E-mail</label>
+                        {{ form.email }}
                     </div>
                     <div class="col-md-3">
-                        <label class="form-label fw-bold">Telefone/Celular</label>
-                        <input type="tel" name="telefone" class="form-control">
+                        <label class="form-label fw-bold">Telefone</label>
+                        {{ form.telefone }}
                     </div>
                     <div class="col-md-3">
                         <label class="form-label fw-bold">Estado Civil</label>
-                        <select name="estado_civil" class="form-select">
-                            <option selected>Selecione...</option>
-                            <option value="solteiro">Solteiro(a)</option>
-                            <option value="casado">Casado(a)</option>
-                            <option value="divorciado">Divorciado(a)</option>
-                        </select>
+                        {{ form.estado_civil }}
                     </div>
                 </div>
 
                 <hr class="text-muted opacity-25">
 
-                <h5 class="text-primary fw-bold mb-3 mt-4"><i class="bi bi-briefcase-fill me-2"></i>Dados Contratuais</h5>
+                <h5 class="text-secondary fw-bold mb-3 mt-4 small text-uppercase ls-1">Dados Contratuais</h5>
                 <div class="row g-3 mb-4">
                     <div class="col-md-4">
                         <label class="form-label fw-bold">Cargo</label>
-                        <input type="text" name="cargo" class="form-control" required>
+                        {{ form.cargo }}
                     </div>
                     <div class="col-md-4">
                         <label class="form-label fw-bold">Departamento</label>
-                        <select name="departamento" class="form-select">
-                            <option selected>Administrativo</option>
-                            <option>Financeiro</option>
-                            <option>TI</option>
-                            <option>Operacional</option>
-                            <option>RH</option>
-                        </select>
+                        {{ form.departamento }}
                     </div>
                     <div class="col-md-4">
                         <label class="form-label fw-bold">Data de Admissão</label>
-                        <input type="date" name="data_admissao" class="form-control" required>
+                        <input type="date" name="data_admissao" class="form-control" 
+                               value="{{ form.data_admissao.value|date:'Y-m-d'|default:'' }}" required>
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label fw-bold">Salário Base (R$)</label>
-                        <input type="number" step="0.01" name="salario" class="form-control">
+                        <label class="form-label fw-bold">Salário (R$)</label>
+                        {{ form.salario }}
                     </div>
                     <div class="col-md-4">
                         <label class="form-label fw-bold">Tipo de Contrato</label>
-                        <select name="tipo_contrato" class="form-select">
-                            <option value="clt">CLT</option>
-                            <option value="pj">PJ</option>
-                            <option value="estagio">Estágio</option>
-                        </select>
+                        {{ form.tipo_contrato }}
                     </div>
                 </div>
 
                 <hr class="text-muted opacity-25">
 
-                <h5 class="text-primary fw-bold mb-3 mt-4"><i class="bi bi-geo-alt-fill me-2"></i>Endereço</h5>
+                <h5 class="text-secondary fw-bold mb-3 mt-4 small text-uppercase ls-1">Endereço</h5>
                 <div class="row g-3 mb-4">
                     <div class="col-md-2">
                         <label class="form-label fw-bold">CEP</label>
-                        <input type="text" name="cep" class="form-control">
+                        <input type="text" name="cep" id="id_cep" class="form-control" 
+                               value="{{ form.cep.value|default:'' }}" placeholder="00000-000" maxlength="9">
                     </div>
                     <div class="col-md-8">
-                        <label class="form-label fw-bold">Rua/Avenida</label>
-                        <input type="text" name="logradouro" class="form-control">
+                        <label class="form-label fw-bold">Logradouro</label>
+                        <input type="text" name="logradouro" id="id_logradouro" class="form-control"
+                               value="{{ form.logradouro.value|default:'' }}">
                     </div>
                     <div class="col-md-2">
                         <label class="form-label fw-bold">Número</label>
-                        <input type="text" name="numero" class="form-control">
+                        <input type="text" name="numero" id="id_numero" class="form-control"
+                               value="{{ form.numero.value|default:'' }}">
                     </div>
                     <div class="col-md-4">
                         <label class="form-label fw-bold">Bairro</label>
-                        <input type="text" name="bairro" class="form-control">
+                        <input type="text" name="bairro" id="id_bairro" class="form-control"
+                               value="{{ form.bairro.value|default:'' }}">
                     </div>
                     <div class="col-md-4">
                         <label class="form-label fw-bold">Cidade</label>
-                        <input type="text" name="cidade" class="form-control">
+                        <input type="text" name="cidade" id="id_cidade" class="form-control"
+                               value="{{ form.cidade.value|default:'' }}">
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label fw-bold">Estado</label>
-                        <select name="uf" class="form-select">
-                            <option value="SP">São Paulo</option>
-                            <option value="RJ">Rio de Janeiro</option>
-                            <option value="MG">Minas Gerais</option>
-                            </select>
+                        <label class="form-label fw-bold">Estado (UF)</label>
+                        {{ form.uf }}
                     </div>
                 </div>
 
                 <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-5">
-                    <button type="submit" class="btn btn-primary px-5 rounded-pill fw-bold">
-                        <i class="bi bi-check-lg me-2"></i> Salvar Cadastro
+                    <button type="submit" class="btn {% if id_editar %}btn-warning text-dark{% else %}btn-success{% endif %} px-5 rounded-pill fw-bold">
+                        <i class="bi {% if id_editar %}bi-save{% else %}bi-check-lg{% endif %} me-2"></i> 
+                        {% if id_editar %}Salvar Alterações{% else %}Salvar Cadastro{% endif %}
                     </button>
                 </div>
 
@@ -130,4 +197,49 @@
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const cepInput = document.getElementById('id_cep');
+        
+        if (cepInput) {
+            cepInput.addEventListener('blur', function() {
+                let cep = this.value.replace(/\D/g, '');
+                if (cep.length === 8) {
+                    fetch(`https://viacep.com.br/ws/${cep}/json/`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (!data.erro) {
+                                if(document.getElementById('id_logradouro')) document.getElementById('id_logradouro').value = data.logradouro;
+                                if(document.getElementById('id_bairro')) document.getElementById('id_bairro').value = data.bairro;
+                                if(document.getElementById('id_cidade')) document.getElementById('id_cidade').value = data.localidade;
+                                
+                                const ufSelect = document.getElementById('id_uf');
+                                if(ufSelect) ufSelect.value = data.uf;
+
+                                document.getElementById('id_numero').focus();
+                            } else {
+                                alert("CEP não encontrado.");
+                            }
+                        })
+                        .catch(error => console.error('Erro:', error));
+                }
+            });
+        }
+    });
+</script>
+
+<style>
+    /* Estilo para garantir inputs bonitos */
+    input[type="text"], input[type="email"], input[type="number"], select {
+        display: block;
+        width: 100%;
+        padding: 0.375rem 0.75rem;
+        font-size: 1rem;
+        color: #212529;
+        background-color: #fff;
+        border: 1px solid #ced4da;
+        border-radius: 0.375rem;
+    }
+</style>
 {% endblock %}
