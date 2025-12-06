@@ -18,4 +18,4 @@ def cadastro_funcionario(request):
     else:
         form = FuncionarioForm()
 
-    return render(request, 'human_resources/cadastro_funcionario.html', {'form': form})
+    return render(request, 'human_resources/cadastro_de_funcionario.html', {'form': form})
