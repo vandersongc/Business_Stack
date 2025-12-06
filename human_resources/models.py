@@ -1,4 +1,5 @@
 from django.db import models
+from decimal import Decimal
 
 class Funcionario(models.Model):
     # --- Opções de escolha (Dropdowns) ---
@@ -67,3 +68,24 @@ class Funcionario(models.Model):
 
     def __str__(self):
         return self.nome_completo
+    
+    # --- CAMPOS PARA DESLIGAMENTO ---
+    desligado = models.BooleanField(default=False, verbose_name="Colaborador Desligado?")
+    data_desligamento = models.DateField(verbose_name="Data do Desligamento", blank=True, null=True)
+
+    # ... (restante dos campos: cep, logradouro, criado_em, def __str__) ...
+
+    # --- CÁLCULOS AUTOMÁTICOS (PROPRIEDADES) ---
+    @property
+    def calculo_descontos(self):
+        """Simulação de descontos (ex: 11% de INSS + 6% VT = 17% fixo para exemplo)"""
+        if self.salario:
+            return self.salario * Decimal('0.17')
+        return Decimal('0.00')
+
+    @property
+    def salario_liquido(self):
+        """Salário Bruto - Descontos"""
+        if self.salario:
+            return self.salario - self.calculo_descontos
+        return Decimal('0.00')

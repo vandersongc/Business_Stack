@@ -45,6 +45,7 @@
                                 <th>CPF</th>
                                 <th>Cargo</th>
                                 <th>Departamento</th>
+                                <th>Status</th>
                                 <th class="text-end">Ações</th>
                             </tr>
                         </thead>
@@ -55,6 +56,13 @@
                                 <td>{{ func.cpf }}</td>
                                 <td>{{ func.cargo }}</td>
                                 <td>{{ func.departamento }}</td>
+                                <td>
+                                    {% if func.desligado %}
+                                        <span class="badge bg-danger">Desligado</span>
+                                    {% else %}
+                                        <span class="badge bg-success">Ativo</span>
+                                    {% endif %}
+                                </td>
                                 <td class="text-end">
                                     <a href="?termo_busca={{ termo_busca }}&id_editar={{ func.id }}#formulario_anchor" 
                                        class="btn btn-sm btn-outline-primary fw-bold">
@@ -152,6 +160,22 @@
                 </div>
 
                 <hr class="text-muted opacity-25">
+                <h5 class="text-danger fw-bold mb-3 mt-4 small text-uppercase ls-1">Área de Desligamento</h5>
+                <div class="row g-3 mb-4 bg-danger bg-opacity-10 p-3 rounded align-items-center">
+                    <div class="col-md-5">
+                        <div class="form-check form-switch">
+                            {{ form.desligado }}
+                            <label class="form-check-label fw-bold" for="id_desligado">Colaborador desligado?</label>
+                        </div>
+                    </div>
+                    <div class="col-md-4" id="div_data_desligamento" style="display: none;">
+                        <label class="form-label fw-bold text-danger">Data do Desligamento</label>
+                        <input type="date" name="data_desligamento" id="id_data_desligamento" class="form-control"
+                               value="{{ form.data_desligamento.value|date:'Y-m-d'|default:'' }}">
+                    </div>
+                </div>
+
+                <hr class="text-muted opacity-25">
 
                 <h5 class="text-secondary fw-bold mb-3 mt-4 small text-uppercase ls-1">Endereço</h5>
                 <div class="row g-3 mb-4">
@@ -196,16 +220,81 @@
             </form>
         </div>
     </div>
+    
+    {% if id_editar and historico %}
+    <div class="card border-0 shadow-sm rounded-4 mt-5">
+        <div class="card-header bg-secondary bg-opacity-10 border-0 pt-4 px-4">
+            <h5 class="fw-bold mb-0"><i class="bi bi-clock-history me-2"></i>Histórico de Alterações</h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-striped mb-0">
+                    <thead>
+                        <tr>
+                            <th class="px-4">Data/Hora</th>
+                            <th>Usuário</th>
+                            <th>Ação</th>
+                            <th>Detalhes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for log in historico %}
+                        <tr>
+                            <td class="px-4">{{ log.action_time|date:"d/m/Y H:i" }}</td>
+                            <td>{{ log.user.username }}</td>
+                            <td>
+                                {% if log.action_flag == 1 %}Criado{% elif log.action_flag == 2 %}Editado{% else %}Apagado{% endif %}
+                            </td>
+                            <td class="text-muted">{{ log.change_message }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
 </div>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        
+        // --- 1. Lógica do Checkbox de Desligamento ---
+        const checkDesligado = document.getElementById('id_desligado');
+        const divDataDesligamento = document.getElementById('div_data_desligamento');
+        const inputDataDesligamento = document.getElementById('id_data_desligamento');
+
+        function toggleDesligamento() {
+            if (checkDesligado && checkDesligado.checked) {
+                divDataDesligamento.style.display = 'block';
+                inputDataDesligamento.required = true; // Torna a data obrigatória se marcado
+            } else if (checkDesligado) {
+                divDataDesligamento.style.display = 'none';
+                inputDataDesligamento.value = ''; // Limpa a data
+                inputDataDesligamento.required = false;
+            }
+        }
+
+        // Executa ao carregar (para ver se já veio marcado do banco)
+        toggleDesligamento();
+
+        // Executa ao clicar
+        if (checkDesligado) {
+            checkDesligado.addEventListener('change', toggleDesligamento);
+        }
+
+
+        // --- 2. Lógica do CEP Automático ---
         const cepInput = document.getElementById('id_cep');
         
         if (cepInput) {
             cepInput.addEventListener('blur', function() {
                 let cep = this.value.replace(/\D/g, '');
+                
                 if (cep.length === 8) {
+                    // Feedback visual
+                    if(document.getElementById('id_logradouro')) document.getElementById('id_logradouro').placeholder = "Buscando...";
+
                     fetch(`https://viacep.com.br/ws/${cep}/json/`)
                         .then(response => response.json())
                         .then(data => {
@@ -214,12 +303,14 @@
                                 if(document.getElementById('id_bairro')) document.getElementById('id_bairro').value = data.bairro;
                                 if(document.getElementById('id_cidade')) document.getElementById('id_cidade').value = data.localidade;
                                 
+                                // Tenta selecionar o estado no Dropdown
                                 const ufSelect = document.getElementById('id_uf');
                                 if(ufSelect) ufSelect.value = data.uf;
 
                                 document.getElementById('id_numero').focus();
                             } else {
                                 alert("CEP não encontrado.");
+                                if(document.getElementById('id_logradouro')) document.getElementById('id_logradouro').placeholder = "";
                             }
                         })
                         .catch(error => console.error('Erro:', error));
@@ -230,8 +321,8 @@
 </script>
 
 <style>
-    /* Estilo para garantir inputs bonitos */
-    input[type="text"], input[type="email"], input[type="number"], select {
+    /* Estilo global para inputs gerados pelo Django ficarem padronizados */
+    input[type="text"], input[type="email"], input[type="number"], input[type="tel"], select, input[type="date"] {
         display: block;
         width: 100%;
         padding: 0.375rem 0.75rem;
@@ -240,6 +331,14 @@
         background-color: #fff;
         border: 1px solid #ced4da;
         border-radius: 0.375rem;
+    }
+    
+    /* Ajuste específico para o Switch do Bootstrap */
+    .form-check-input {
+        width: 3em; 
+        height: 1.5em; 
+        margin-right: 10px;
+        cursor: pointer;
     }
 </style>
 {% endblock %}

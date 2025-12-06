@@ -4,6 +4,12 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Q 
 from django.contrib.admin.models import LogEntry, ADDITION, CHANGE
 from django.contrib.contenttypes.models import ContentType
+import csv
+import datetime
+from django.http import HttpResponse
+from django.template.loader import render_to_string
+from xhtml2pdf import pisa # Requer: pip install xhtml2pdf
+import openpyxl # Requer: pip install openpyxl
 
 from .forms import FuncionarioForm
 from .models import Funcionario
@@ -101,3 +107,79 @@ def cadastro_funcionario(request):
         'funcionario_editando': funcionario_instance,
         'historico': historico
     })
+
+@login_required
+def folha_pagamento(request):
+    # Filtra apenas funcionários ATIVOS (não desligados)
+    funcionarios = Funcionario.objects.filter(desligado=False)
+    
+    total_bruto = sum(f.salario for f in funcionarios if f.salario)
+    total_liquido = sum(f.salario_liquido for f in funcionarios if f.salario)
+
+    return render(request, 'human_resources/folha_de_pagamento.html', {
+        'funcionarios': funcionarios,
+        'total_bruto': total_bruto,
+        'total_liquido': total_liquido
+    })
+
+@login_required
+def exportar_folha(request, formato):
+    funcionarios = Funcionario.objects.filter(desligado=False)
+    date_str = datetime.datetime.now().strftime("%Y-%m-%d")
+    
+    # --- EXPORTAR EXCEL (XLS/XLSX) ---
+    if formato == 'xls':
+        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = f'attachment; filename="Folha_Pagamento_{date_str}.xlsx"'
+        
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.title = "Folha de Pagamento"
+        
+        # Cabeçalho
+        ws.append(['Nome', 'CPF', 'Cargo', 'Salário Bruto', 'Descontos (Est.)', 'Salário Líquido'])
+        
+        # Dados
+        for f in funcionarios:
+            ws.append([
+                f.nome_completo, 
+                f.cpf, 
+                f.cargo, 
+                f.salario, 
+                f.calculo_descontos, 
+                f.salario_liquido
+            ])
+            
+        wb.save(response)
+        return response
+
+    # --- EXPORTAR TXT ---
+    elif formato == 'txt':
+        response = HttpResponse(content_type='text/plain')
+        response['Content-Disposition'] = f'attachment; filename="Folha_Pagamento_{date_str}.txt"'
+        
+        lines = []
+        lines.append(f"FOLHA DE PAGAMENTO - {date_str}\n")
+        lines.append("-" * 80 + "\n")
+        lines.append(f"{'NOME':<30} | {'CPF':<15} | {'BRUTO':<10} | {'DESC.':<10} | {'LÍQUIDO':<10}\n")
+        lines.append("-" * 80 + "\n")
+        
+        for f in funcionarios:
+            line = f"{f.nome_completo[:30]:<30} | {f.cpf:<15} | {f.salario:<10} | {f.calculo_descontos:<10} | {f.salario_liquido:<10}\n"
+            lines.append(line)
+            
+        response.writelines(lines)
+        return response
+
+    # --- EXPORTAR PDF ---
+    elif formato == 'pdf':
+        html_string = render_to_string('human_resources/folha_pdf_template.html', {'funcionarios': funcionarios})
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="Folha_Pagamento_{date_str}.pdf"'
+        
+        pisa_status = pisa.CreatePDF(html_string, dest=response)
+        if pisa_status.err:
+            return HttpResponse('Erro ao gerar PDF', status=500)
+        return response
+
+    return redirect('folha_pagamento')
