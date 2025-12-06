@@ -19,6 +19,9 @@ urlpatterns = [
     # --- Rotas de RH ---
     path('pessoal/', rh_views.home_rh, name='pessoal'), 
     path('cadastro_funcionarios/', rh_views.cadastro_funcionario, name='cadastro_funcionarios'),
+    path('folha_pagamento/', rh_views.folha_pagamento, name='folha_pagamento'),
+    path('exportar_folha/<str:formato>/', rh_views.exportar_folha, name='exportar_folha'),
+    # ----------------------------------
     
     # Rotas dos Módulos (seus outros links)
     path('administrador/', temp_views.administrador, name='administrador'),
