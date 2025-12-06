@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.urls import path
 from home import views as home_views
-# Se estiver usando temp_views para outras coisas, mantenha a importação:
+from human_resources import views as rh_views
 from . import views as temp_views 
 
 urlpatterns = [
@@ -17,6 +17,10 @@ urlpatterns = [
     # -------------------------------------------------------
     
     path('logout/', home_views.logout_view, name='logout'),
+
+   
+    path('pessoal/', rh_views.home_rh, name='pessoal'), 
+    
 
     # Rotas dos Módulos (seus outros links)
     path('administrador/', temp_views.administrador, name='administrador'),

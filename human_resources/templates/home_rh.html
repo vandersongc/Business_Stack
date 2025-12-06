@@ -1,66 +1,41 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Dashboard | Business Stack{% endblock %}
+{% block title %}Pessoal | Business Stack{% endblock %}
 
 {% block content %}
 <div class="container py-5">
     <div class="text-center mb-5">
-        <h2 class="page-title display-6 mb-2">Painel de Controle</h2>
-        <p class="lead text-muted" style="font-size: 1rem;">Selecione um módulo para gerenciar</p>
+        <h2 class="page-title display-6 mb-2">Módulo Pessoal (RH)</h2>
+        <p class="lead text-muted">Gestão de Recursos Humanos</p>
     </div>
-    
-    <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-4 justify-content-center">
+
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        <div class="col">
+            <div class="card h-100 shadow-sm border-0">
+                <div class="card-body text-center">
+                    <h5 class="card-title text-primary">Funcionários</h5>
+                    <p class="card-text text-muted">Gerenciar cadastro de colaboradores.</p>
+                    <a href="#" class="btn btn-outline-primary btn-sm rounded-pill">Acessar</a>
+                </div>
+            </div>
+        </div>
         
         <div class="col">
-            <a href="{% url 'administrador' %}" class="module-card">
-                <img src="{% static 'img/pasta_adm.jpg' %}" alt="Aquisições e Talentos">
-                <span>Administrador</span>
-            </a>
+            <div class="card h-100 shadow-sm border-0">
+                <div class="card-body text-center">
+                    <h5 class="card-title text-primary">Folha de Pagamento</h5>
+                    <p class="card-text text-muted">Processamento de salários e benefícios.</p>
+                    <a href="#" class="btn btn-outline-primary btn-sm rounded-pill">Acessar</a>
+                </div>
+            </div>
         </div>
-
-        <div class="col">
-            <a href="{% url 'financeiro' %}" class="module-card">
-                <img src="{% static 'img/pasta_financeiro.jpg' %}" alt="Benefícios">
-                <span>Financeiro</span>
-            </a>
-        </div>
-
-        <div class="col">
-            <a href="{% url 'pessoal' %}" class="module-card">
-                <img src="{% static 'img/pasta_pessoal.jpg' %}" alt="Cadastro de Funcionários">
-                <span>Pessoal</span>
-            </a>
-        </div>
-
-        <div class="col">
-            <a href="{% url 'suprimentos' %}" class="module-card">
-                <img src="{% static 'img/pasta_suprimentos.jpg' %}" alt="Capacitação">
-                <span>Suprimentos</span>
-            </a>
-        </div>
-
-        <div class="col">
-            <a href="{% url 'contabilidade' %}" class="module-card">
-                <img src="{% static 'img/pasta_contabilidade.jpg' %}" alt="Comunicação Interna">
-                <span>Contabilidade</span>
-            </a>
-        </div>
-
-        <div class="col">
-            <a href="{% url 'logistica' %}" class="module-card">
-                <img src="{% static 'img/pasta_logistica.jpg' %}" alt="Operações de RH">
-                <span>Logística</span>
-            </a>
-        </div>
-
-        <div class="col">
-            <a href="{% url 'auditoria' %}" class="module-card">
-                <img src="{% static 'img/pasta_auditoria.jpg' %}" alt="Saúde, Segurança e Meio Ambiente">
-                <span>Auditoria</span>
-            </a>
-        </div>
-
+    </div>
+    
+    <div class="text-center mt-5">
+        <a href="{% url 'home' %}" class="btn btn-secondary rounded-pill px-4">
+            <i class="bi bi-arrow-left me-2"></i> Voltar ao Dashboard
+        </a>
     </div>
 </div>
 {% endblock %}
