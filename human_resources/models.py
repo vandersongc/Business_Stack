@@ -1,7 +1,7 @@
-# human_resources/models.py
 from django.db import models
 from decimal import Decimal
 from django.utils import timezone
+
 
 class Funcionario(models.Model):
     # --- CHOICES ---
@@ -10,6 +10,12 @@ class Funcionario(models.Model):
         ('divorciado', 'Divorciado(a)'), ('viuvo', 'Viúvo(a)'),
     ]
     TIPO_CONTRATO_CHOICES = [('clt', 'CLT'), ('pj', 'PJ'), ('estagio', 'Estágio')]
+    
+    DEPARTAMENTOS_CHOICES = [
+        ('TI', 'Tecnologia da Informação'), ('RH', 'Recursos Humanos'), ('FIN', 'Financeiro'),
+        ('ADM', 'Administrativo'), ('COM', 'Comercial'), ('LOG', 'Logística'),
+        ('JUR', 'Jurídico'), ('MKT', 'Marketing')
+    ]
     
     # --- DADOS PESSOAIS ---
     nome_completo = models.CharField(max_length=200, verbose_name="Nome Completo")
@@ -21,7 +27,7 @@ class Funcionario(models.Model):
 
     # --- DADOS CONTRATUAIS ---
     cargo = models.CharField(max_length=100)
-    departamento = models.CharField(max_length=100)
+    departamento = models.CharField(max_length=100) # Você pode usar DEPARTAMENTOS_CHOICES se preferir select
     lotacao = models.CharField(max_length=100, blank=True, null=True)
     data_admissao = models.DateField(verbose_name="Data de Admissão")
     salario = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Salário Base Atual")
@@ -40,11 +46,11 @@ class Funcionario(models.Model):
     agencia = models.CharField(max_length=10, blank=True, null=True)
     conta = models.CharField(max_length=20, blank=True, null=True)
 
-    # --- CAMPOS LEGADOS (Mantidos para não dar erro na migração imediata, mas o ideal é migrar para Eventos) ---
-    desc_vale_transporte = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    desc_vale_alimentacao = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    desc_assist_medica = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    desc_assist_odonto = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    # --- CAMPOS LEGADOS (Mantidos para compatibilidade, mas o ideal é migrar para Eventos no futuro) ---
+    desc_vale_transporte = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name="Desc. Vale Transporte (Fixo)")
+    desc_vale_alimentacao = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name="Desc. Vale Alimentação (Fixo)")
+    desc_assist_medica = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name="Desc. Assist. Médica (Fixo)")
+    desc_assist_odonto = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name="Desc. Assist. Odonto (Fixo)")
 
     # --- STATUS ---
     desligado = models.BooleanField(default=False)
@@ -78,6 +84,9 @@ class HistoricoCargoSalario(models.Model):
     salario_novo = models.DecimalField(max_digits=10, decimal_places=2)
     motivo = models.CharField(max_length=200) # Ex: Promoção, Dissídio
 
+    def __str__(self):
+        return f"{self.funcionario} - {self.data_alteracao}"
+
 # === MÓDULO 2: FOLHA DE PAGAMENTO (Dinâmica) ===
 
 class EventoFolha(models.Model):
@@ -102,6 +111,9 @@ class LancamentoMensal(models.Model):
     class Meta:
         verbose_name = "Lançamento Mensal"
         verbose_name_plural = "Lançamentos Mensais"
+    
+    def __str__(self):
+        return f"{self.funcionario} - {self.evento} - {self.valor}"
 
 # === MÓDULO 3: PONTO E FREQUÊNCIA ===
 
@@ -116,6 +128,9 @@ class RegistroPonto(models.Model):
     atrasos = models.DecimalField(max_digits=4, decimal_places=2, default=0)
     observacao = models.CharField(max_length=200, blank=True, null=True)
 
+    def __str__(self):
+        return f"Ponto {self.funcionario} - {self.data}"
+
 # === MÓDULO 4: FÉRIAS ===
 
 class ControleFerias(models.Model):
@@ -126,3 +141,6 @@ class ControleFerias(models.Model):
     dias_gozados = models.IntegerField(default=0)
     saldo_dias = models.IntegerField(default=30)
     pago = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"Férias {self.funcionario} ({self.periodo_aquisitivo_inicio})"

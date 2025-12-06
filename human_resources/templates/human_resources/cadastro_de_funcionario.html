@@ -29,7 +29,7 @@
                         <tr>
                             <td>{{ func.nome_completo }}</td><td>{{ func.cargo }}</td>
                             <td>{% if func.desligado %}<span class="badge bg-danger">Desligado</span>{% else %}<span class="badge bg-success">Ativo</span>{% endif %}</td>
-                            <td class="text-end"><a href="?termo_busca={{ termo_busca }}&id_editar={{ func.id }}" class="btn btn-sm btn-primary">Editar</a></td>
+                            <td class="text-end"><a href="?termo_busca={{ termo_busca }}&id_editar={{ func.id }}#formulario_anchor" class="btn btn-sm btn-primary">Editar</a></td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -39,7 +39,9 @@
         </div>
     </div>
 
-    <div class="card border-0 shadow-sm rounded-4">
+    <div id="formulario_anchor"></div>
+
+    <div class="card border-0 shadow-sm rounded-4 {% if id_editar %}border border-primary{% endif %}">
         <div class="card-header bg-white border-0 pt-4 px-4">
             <h4 class="text-primary fw-bold mb-0">{% if id_editar %}Editando: {{ funcionario_editando.nome_completo }}{% else %}Novo Cadastro{% endif %}</h4>
         </div>
@@ -79,11 +81,38 @@
 
                 <h5 class="text-secondary small text-uppercase">Endereço</h5>
                 <div class="row g-3 mb-4">
-                    <div class="col-md-2"><label>CEP</label><input type="text" name="cep" id="id_cep" class="form-control" value="{{ form.cep.value|default:'' }}"></div>
-                    <div class="col-md-6"><label>Rua</label><input type="text" name="logradouro" id="id_logradouro" class="form-control" value="{{ form.logradouro.value|default:'' }}"></div>
-                    <div class="col-md-4"><label>Bairro</label><input type="text" name="bairro" id="id_bairro" class="form-control" value="{{ form.bairro.value|default:'' }}"></div>
-                    <div class="col-md-4"><label>Cidade</label><input type="text" name="cidade" id="id_cidade" class="form-control" value="{{ form.cidade.value|default:'' }}"></div>
-                    <div class="col-md-2"><label>UF</label>{{ form.uf }}</div>
+                    <div class="col-md-2">
+                        <label class="fw-bold">CEP</label>
+                        <input type="text" name="cep" id="id_cep" class="form-control" value="{{ form.cep.value|default:'' }}" maxlength="9">
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label class="fw-bold">Logradouro</label>
+                        <input type="text" name="logradouro" id="id_logradouro" class="form-control" value="{{ form.logradouro.value|default:'' }}">
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="fw-bold">Número</label>
+                        <input type="text" name="numero" id="id_numero" class="form-control" value="{{ form.numero.value|default:'' }}">
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="fw-bold">Complemento</label>
+                        <input type="text" name="complemento" id="id_complemento" class="form-control" value="{{ form.complemento.value|default:'' }}">
+                    </div>
+                    
+                    <div class="col-md-5">
+                        <label class="fw-bold">Bairro</label>
+                        <input type="text" name="bairro" id="id_bairro" class="form-control" value="{{ form.bairro.value|default:'' }}">
+                    </div>
+                    <div class="col-md-5">
+                        <label class="fw-bold">Cidade</label>
+                        <input type="text" name="cidade" id="id_cidade" class="form-control" value="{{ form.cidade.value|default:'' }}">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="fw-bold">UF</label>
+                        {{ form.uf }}
+                    </div>
                 </div>
 
                 <div class="row g-3 mb-4 bg-danger bg-opacity-10 p-3 rounded align-items-center">
@@ -99,20 +128,28 @@
                 </div>
 
                 <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                    <button type="submit" class="btn btn-success px-5 rounded-pill fw-bold">Salvar</button>
+                    <button type="submit" class="btn {% if id_editar %}btn-warning{% else %}btn-success{% endif %} px-5 rounded-pill fw-bold">
+                        {% if id_editar %}Salvar Alterações{% else %}Salvar Cadastro{% endif %}
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
 <script>
     function toggleDesligamento() {
         const chk = document.getElementById('id_desligado');
         const div = document.getElementById('div_data_desligamento');
-        div.style.display = chk.checked ? 'block' : 'none';
+        if(chk && div) {
+            div.style.display = chk.checked ? 'block' : 'none';
+        }
     }
     document.addEventListener('DOMContentLoaded', function() {
         toggleDesligamento();
+        const chk = document.getElementById('id_desligado');
+        if(chk) chk.addEventListener('change', toggleDesligamento);
+
         const cep = document.getElementById('id_cep');
         if(cep) cep.addEventListener('blur', function() {
             let v = this.value.replace(/\D/g,'');
@@ -122,6 +159,8 @@
                     document.getElementById('id_bairro').value=d.bairro;
                     document.getElementById('id_cidade').value=d.localidade;
                     document.getElementById('id_uf').value=d.uf;
+                    // Foca no número após preencher o CEP
+                    document.getElementById('id_numero').focus();
                 }
             });
         });
