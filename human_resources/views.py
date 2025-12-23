@@ -122,7 +122,6 @@ def _get_contracheque_context(f):
         total_descontos += val_inss
 
     base_irrf = base_inss - val_inss 
-    # (Futuramente: abater dependentes aqui)
     val_irrf = calcular_irpf_sobre_base(base_irrf)
     if val_irrf > 0:
         itens_holerite.append({'codigo': '911', 'descricao': 'IRRF', 'ref': 'Tab.', 'vencimento': 0, 'desconto': val_irrf})
@@ -142,15 +141,14 @@ def _get_contracheque_context(f):
 
     liquido = total_vencimentos - total_descontos
 
-    # Formata para o template antigo que espera campos específicos
-    # Injetamos os cálculos prontos para evitar recalculo no template
     return {
         'f': f,
         'mes_referencia': mes_ref,
         'data_emissao': now,
-        'itens_holerite': itens_holerite, # Nova lista detalhada
+        'itens_holerite': itens_holerite,
         'inss': val_inss,
         'irpf': val_irrf,
+        'total_vencimentos': total_vencimentos,  # <--- ADICIONADO AQUI
         'total_descontos': total_descontos,
         'salario_liquido': liquido,
         'fgts': base_inss * Decimal('0.08'),

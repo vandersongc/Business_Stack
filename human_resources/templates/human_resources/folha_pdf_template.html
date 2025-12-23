@@ -15,24 +15,31 @@
 <body>
     <h1 style="text-align: center;">Relatório de Folha de Pagamento</h1>
     <div style="text-align: center; color: #777;">Gerado em: {% now "d/m/Y H:i" %}</div>
-    <table>
-        <thead><tr><th>Nome</th><th>CPF</th><th class="right">Bruto</th><th class="right">Descontos</th><th class="right">Líquido</th></tr></thead>
+    <table class="main-table">
+        <thead><tr><th>Cód.</th><th>Descrição</th><th>Ref.</th><th class="right">Vencimentos</th><th class="right">Descontos</th></tr></thead>
         <tbody>
-            {% for f in funcionarios %}
+            {% for item in itens_holerite %}
             <tr>
-                <td>{{ f.nome_completo }}</td><td>{{ f.cpf }}</td>
-                <td class="right">{{ f.salario|floatformat:2 }}</td>
-                <td class="right" style="color:red;">{{ f.calculo_descontos|floatformat:2 }}</td>
-                <td class="right" style="color:green;">{{ f.salario_liquido|floatformat:2 }}</td>
+                <td>{{ item.codigo }}</td>
+                <td>{{ item.descricao }}</td>
+                <td>{{ item.ref }}</td>
+                <td class="right">{% if item.vencimento > 0 %}{{ item.vencimento|floatformat:2 }}{% endif %}</td>
+                <td class="right">{% if item.desconto > 0 %}{{ item.desconto|floatformat:2 }}{% endif %}</td>
             </tr>
             {% endfor %}
-            <tr class="total-row">
-                <td colspan="2" class="right">TOTAIS GERAIS:</td>
-                <td class="right">{{ total_bruto|floatformat:2 }}</td>
-                <td></td>
-                <td class="right">{{ total_liquido|floatformat:2 }}</td>
-            </tr>
+            <tr style="height: 50px;"><td colspan="5"></td></tr>
         </tbody>
+    </table>
+    <table class="footer-table" style="background-color: #eee;">
+        <tr>
+            <td width="60%"></td>
+            <td width="20%">TOTAIS</td>
+            <td width="10%" class="right">{{ total_vencimentos|floatformat:2 }}</td>
+            <td width="10%" class="right">{{ total_descontos|floatformat:2 }}</td>
+        </tr>
+    </table>
+    <table class="footer-table">
+        <tr><td width="70%">LÍQUIDO A RECEBER -></td><td width="30%" class="right" style="border:1px solid #000;"><strong>R$ {{ salario_liquido|floatformat:2 }}</strong></td></tr>
     </table>
 </body>
 </html>

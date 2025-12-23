@@ -16,16 +16,30 @@
             <div class="col-3"><small>LOTAÇÃO</small><div>{{ f.lotacao|default:'-' }}</div></div>
         </div>
         <table class="table table-bordered">
-            <thead class="table-secondary"><tr><th>Cód</th><th>Descrição</th><th>Ref.</th><th class="text-end">Vencimentos</th><th class="text-end">Descontos</th></tr></thead>
+            <thead class="table-secondary">
+                <tr><th>Cód</th><th>Descrição</th><th>Ref.</th><th class="text-end">Vencimentos</th><th class="text-end">Descontos</th></tr>
+            </thead>
             <tbody>
-                <tr><td>001</td><td>Salário Base</td><td>30d</td><td class="text-end">{{ f.salario }}</td><td></td></tr>
-                <tr><td>901</td><td>INSS</td><td>Tab.</td><td></td><td class="text-end">{{ inss|floatformat:2 }}</td></tr>
-                {% if irpf > 0 %}<tr><td>911</td><td>IRRF</td><td>Tab.</td><td></td><td class="text-end">{{ irpf|floatformat:2 }}</td></tr>{% endif %}
-                {% if f.desc_vale_transporte > 0 %}<tr><td>920</td><td>Vale Transporte</td><td>-</td><td></td><td class="text-end">{{ f.desc_vale_transporte }}</td></tr>{% endif %}
-                {% if f.desc_vale_alimentacao > 0 %}<tr><td>921</td><td>Vale Alimentação</td><td>-</td><td></td><td class="text-end">{{ f.desc_vale_alimentacao }}</td></tr>{% endif %}
+                {% for item in itens_holerite %}
+                <tr>
+                    <td>{{ item.codigo }}</td>
+                    <td>{{ item.descricao }}</td>
+                    <td>{{ item.ref }}</td>
+                    <td class="text-end">
+                        {% if item.vencimento > 0 %}{{ item.vencimento|floatformat:2 }}{% endif %}
+                    </td>
+                    <td class="text-end">
+                        {% if item.desconto > 0 %}{{ item.desconto|floatformat:2 }}{% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
             </tbody>
             <tfoot class="fw-bold">
-                <tr><td colspan="3" class="text-end">TOTAIS</td><td class="text-end">{{ f.salario }}</td><td class="text-end text-danger">{{ f.total_descontos|floatformat:2 }}</td></tr>
+                <tr>
+                    <td colspan="3" class="text-end">TOTAIS</td>
+                    <td class="text-end text-primary">{{ total_vencimentos|floatformat:2 }}</td>
+                    <td class="text-end text-danger">{{ total_descontos|floatformat:2 }}</td>
+                </tr>
             </tfoot>
         </table>
         <div class="row mt-4">
