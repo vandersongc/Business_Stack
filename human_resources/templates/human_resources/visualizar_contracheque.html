@@ -17,7 +17,13 @@
         </div>
         <table class="table table-bordered">
             <thead class="table-secondary">
-                <tr><th>Cód</th><th>Descrição</th><th>Ref.</th><th class="text-end">Vencimentos</th><th class="text-end">Descontos</th></tr>
+                <tr>
+                    <th>Cód</th>
+                    <th>Descrição</th>
+                    <th>Ref.</th>
+                    <th class="text-end">Vencimentos</th>
+                    <th class="text-end">Descontos</th>
+                </tr>
             </thead>
             <tbody>
                 {% for item in itens_holerite %}
@@ -33,12 +39,21 @@
                     </td>
                 </tr>
                 {% endfor %}
+                
+                {% if itens_holerite|length < 5 %}
+                    <tr><td colspan="5">&nbsp;</td></tr>
+                    <tr><td colspan="5">&nbsp;</td></tr>
+                {% endif %}
             </tbody>
-            <tfoot class="fw-bold">
+            <tfoot class="fw-bold bg-light">
                 <tr>
                     <td colspan="3" class="text-end">TOTAIS</td>
                     <td class="text-end text-primary">{{ total_vencimentos|floatformat:2 }}</td>
                     <td class="text-end text-danger">{{ total_descontos|floatformat:2 }}</td>
+                </tr>
+                <tr class="table-active">
+                    <td colspan="4" class="text-end">LÍQUIDO A RECEBER</td>
+                    <td class="text-end fs-5 text-success">{{ salario_liquido|floatformat:2 }}</td>
                 </tr>
             </tfoot>
         </table>

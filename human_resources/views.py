@@ -88,34 +88,51 @@ def calcular_irpf_sobre_base(base_tributavel):
 
 def _get_contracheque_context(f):
     now = datetime.datetime.now()
-    mes_ref = now.strftime("%m/%Y") # Ex: "12/2025"
+    mes_ref = now.strftime("%m/%Y")
     
     # 1. Recuperar eventos variáveis lançados para este mês
     lancamentos = LancamentoMensal.objects.filter(funcionario=f, mes_referencia=mes_ref)
     
     itens_holerite = []
     
-    # Adiciona Salário Base
+    # Adiciona Salário Base como o primeiro item
     itens_holerite.append({
-        'codigo': '001', 'descricao': 'SALARIO BASE', 'ref': '30d', 
-        'vencimento': f.salario, 'desconto': Decimal(0)
+        'codigo': '001', 
+        'descricao': 'SALARIO BASE', 
+        'ref': '30d', 
+        'vencimento': f.salario, 
+        'desconto': Decimal(0)
     })
     
+    # Variáveis acumuladoras
     total_vencimentos = f.salario or Decimal(0)
     total_descontos = Decimal(0)
     base_inss = f.salario or Decimal(0)
     
-    # Processa lançamentos variáveis (ex: Hora Extra)
+    # 2. Processa lançamentos variáveis (ex: Hora Extra, Atrasos)
     for l in lancamentos:
         if l.evento.tipo == 'V':
-            itens_holerite.append({'codigo': l.evento.codigo, 'descricao': l.evento.nome, 'ref': l.quantidade or '-', 'vencimento': l.valor, 'desconto': 0})
+            itens_holerite.append({
+                'codigo': l.evento.codigo, 
+                'descricao': l.evento.nome, 
+                'ref': l.quantidade or '-', 
+                'vencimento': l.valor, 
+                'desconto': 0
+            })
             total_vencimentos += l.valor
-            if l.evento.incide_inss: base_inss += l.valor
+            if l.evento.incide_inss: 
+                base_inss += l.valor
         else:
-            itens_holerite.append({'codigo': l.evento.codigo, 'descricao': l.evento.nome, 'ref': l.quantidade or '-', 'vencimento': 0, 'desconto': l.valor})
+            itens_holerite.append({
+                'codigo': l.evento.codigo, 
+                'descricao': l.evento.nome, 
+                'ref': l.quantidade or '-', 
+                'vencimento': 0, 
+                'desconto': l.valor
+            })
             total_descontos += l.valor
 
-    # 3. Calcular Impostos Dinamicamente
+    # 3. Calcular Impostos (INSS e IRRF)
     val_inss = calcular_inss_sobre_base(base_inss)
     if val_inss > 0:
         itens_holerite.append({'codigo': '901', 'descricao': 'INSS', 'ref': 'Tab.', 'vencimento': 0, 'desconto': val_inss})
@@ -127,7 +144,7 @@ def _get_contracheque_context(f):
         itens_holerite.append({'codigo': '911', 'descricao': 'IRRF', 'ref': 'Tab.', 'vencimento': 0, 'desconto': val_irrf})
         total_descontos += val_irrf
 
-    # Adicionar descontos fixos antigos (Legado)
+    # 4. Adicionar descontos fixos (Benefícios antigos)
     fixos = [
         ('920', 'VALE TRANSPORTE', f.desc_vale_transporte),
         ('921', 'VALE ALIMENTACAO', f.desc_vale_alimentacao),
@@ -139,20 +156,20 @@ def _get_contracheque_context(f):
             itens_holerite.append({'codigo': cod, 'descricao': desc, 'ref': '-', 'vencimento': 0, 'desconto': val})
             total_descontos += val
 
-    liquido = total_vencimentos - total_descontos
+    # 5. Cálculo Final do Líquido
+    salario_liquido = total_vencimentos - total_descontos
 
     return {
         'f': f,
         'mes_referencia': mes_ref,
         'data_emissao': now,
         'itens_holerite': itens_holerite,
-        'inss': val_inss,
-        'irpf': val_irrf,
-        'total_vencimentos': total_vencimentos,  # <--- ADICIONADO AQUI
-        'total_descontos': total_descontos,
-        'salario_liquido': liquido,
+        'total_vencimentos': total_vencimentos,  # Essencial para o total positivo
+        'total_descontos': total_descontos,      # Essencial para o total negativo
+        'salario_liquido': salario_liquido,      # Essencial para o líquido
+        'base_inss': base_inss,
+        'base_irrf': base_irrf,
         'fgts': base_inss * Decimal('0.08'),
-        'base_irrf': base_irrf
     }
 
 # --- VIEWS DA FOLHA ---
