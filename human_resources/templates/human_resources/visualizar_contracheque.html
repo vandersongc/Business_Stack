@@ -1,71 +1,70 @@
 {% extends 'base.html' %}
+
 {% block content %}
-<div class="container py-5">
-    <div class="d-flex justify-content-between mb-4">
-        <a href="{% url 'consulta_contracheque' %}" class="btn btn-outline-secondary rounded-pill">Voltar</a>
-        <a href="{% url 'gerar_contracheque_pdf' f.id %}" class="btn btn-danger rounded-pill">Baixar PDF</a>
-    </div>
-    <div class="card shadow-lg p-5 mx-auto" style="max-width: 900px;">
-        <div class="row border-bottom pb-3 mb-3">
-            <div class="col-8"><h4>BUSINESS STACK</h4><small>CNPJ: 00.000.000/0001-00</small></div>
-            <div class="col-4 text-end"><h5>RECIBO DE PAGAMENTO</h5><span class="badge bg-light text-dark border">{{ mes_referencia }}</span></div>
-        </div>
-        <div class="row bg-light p-3 mb-3">
-            <div class="col-6"><small>COLABORADOR</small><div>{{ f.nome_completo }}</div></div>
-            <div class="col-3"><small>CARGO</small><div>{{ f.cargo }}</div></div>
-            <div class="col-3"><small>LOTAÇÃO</small><div>{{ f.lotacao|default:'-' }}</div></div>
-        </div>
-        <table class="table table-bordered">
-            <thead class="table-secondary">
-                <tr>
-                    <th>Cód</th>
-                    <th>Descrição</th>
-                    <th>Ref.</th>
-                    <th class="text-end">Vencimentos</th>
-                    <th class="text-end">Descontos</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for item in itens_holerite %}
-                <tr>
-                    <td>{{ item.codigo }}</td>
-                    <td>{{ item.descricao }}</td>
-                    <td>{{ item.ref }}</td>
-                    <td class="text-end">
-                        {% if item.vencimento > 0 %}{{ item.vencimento|floatformat:2 }}{% endif %}
-                    </td>
-                    <td class="text-end">
-                        {% if item.desconto > 0 %}{{ item.desconto|floatformat:2 }}{% endif %}
-                    </td>
-                </tr>
-                {% endfor %}
-                
-                {% if itens_holerite|length < 5 %}
-                    <tr><td colspan="5">&nbsp;</td></tr>
-                    <tr><td colspan="5">&nbsp;</td></tr>
-                {% endif %}
-            </tbody>
-            <tfoot class="fw-bold bg-light">
-                <tr>
-                    <td colspan="3" class="text-end">TOTAIS</td>
-                    <td class="text-end text-primary">{{ total_vencimentos|floatformat:2 }}</td>
-                    <td class="text-end text-danger">{{ total_descontos|floatformat:2 }}</td>
-                </tr>
-                <tr class="table-active">
-                    <td colspan="4" class="text-end">LÍQUIDO A RECEBER</td>
-                    <td class="text-end fs-5 text-success">{{ salario_liquido|floatformat:2 }}</td>
-                </tr>
-            </tfoot>
-        </table>
-        <div class="row mt-4">
-            <div class="col-8 p-3 border bg-light">
-                <small class="d-block fw-bold">BASES</small>
-                <span class="me-3">FGTS Mês: {{ fgts|floatformat:2 }}</span>
-                <span>Base IRRF: {{ base_irrf|floatformat:2 }}</span>
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h4 class="mb-0">Contracheque: {{ mes_referencia }}</h4>
+            <div>
+                <a href="{% url 'gerar_contracheque_pdf' f.id %}" class="btn btn-light btn-sm" target="_blank">
+                    <i class="fas fa-print"></i> Imprimir PDF
+                </a>
             </div>
-            <div class="col-4 p-3 border bg-success bg-opacity-10 text-end">
-                <small class="text-success fw-bold">LÍQUIDO</small>
-                <div class="fs-3 fw-bold text-success">{{ f.salario_liquido|floatformat:2 }}</div>
+        </div>
+        <div class="card-body">
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <strong>Funcionário:</strong> {{ f.nome_completo }}<br>
+                    <strong>Cargo:</strong> {{ f.cargo }}
+                </div>
+                <div class="col-md-6 text-end">
+                    <strong>Matrícula:</strong> {{ f.matricula }}<br>
+                    <strong>Departamento:</strong> {{ f.departamento }}
+                </div>
+            </div>
+
+            <table class="table table-bordered">
+                <thead class="table-secondary">
+                    <tr>
+                        <th>Cód</th>
+                        <th>Descrição</th>
+                        <th>Ref.</th>
+                        <th class="text-end">Vencimentos</th>
+                        <th class="text-end">Descontos</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in itens_holerite %}
+                    <tr>
+                        <td>{{ item.codigo }}</td>
+                        <td>{{ item.descricao }}</td>
+                        <td>{{ item.ref }}</td>
+                        <td class="text-end">
+                            {% if item.vencimento > 0 %}{{ item.vencimento|floatformat:2 }}{% endif %}
+                        </td>
+                        <td class="text-end">
+                            {% if item.desconto > 0 %}{{ item.desconto|floatformat:2 }}{% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot class="fw-bold">
+                    <tr>
+                        <td colspan="3" class="text-end">TOTAIS</td>
+                        <td class="text-end text-primary">{{ total_vencimentos|floatformat:2 }}</td>
+                        <td class="text-end text-danger">{{ total_descontos|floatformat:2 }}</td>
+                    </tr>
+                    <tr class="table-active">
+                        <td colspan="4" class="text-end fs-5">LÍQUIDO A RECEBER</td>
+                        <td class="text-end fs-5 text-success">{{ salario_liquido|floatformat:2 }}</td>
+                    </tr>
+                </tfoot>
+            </table>
+            
+            <div class="row mt-4 small text-muted">
+                <div class="col-md-4">Base INSS: R$ {{ base_inss|floatformat:2 }}</div>
+                <div class="col-md-4">Base IRRF: R$ {{ base_irrf|floatformat:2 }}</div>
+                <div class="col-md-4">FGTS do Mês: R$ {{ fgts|floatformat:2 }}</div>
             </div>
         </div>
     </div>

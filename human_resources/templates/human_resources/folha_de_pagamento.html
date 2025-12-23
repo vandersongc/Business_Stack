@@ -1,32 +1,62 @@
 {% extends 'base.html' %}
-{% block title %}Folha de Pagamento{% endblock %}
+
 {% block content %}
-<div class="container py-5">
+<div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <div class="d-flex align-items-center gap-3">
-            <a href="{% url 'pessoal' %}" class="btn btn-outline-secondary btn-sm rounded-pill"><i class="bi bi-arrow-left"></i> Voltar</a>
-            <h2 class="page-title mb-0">Folha de Pagamento</h2>
-        </div>
-        <div class="btn-group">
-            <a href="{% url 'exportar_folha' 'pdf' %}" class="btn btn-danger">PDF</a>
-            <a href="{% url 'exportar_folha' 'xls' %}" class="btn btn-success">Excel</a>
-            <a href="{% url 'exportar_folha' 'txt' %}" class="btn btn-secondary">TXT</a>
+        <h2>Folha de Pagamento - {{ data_atual|date:"F/Y" }}</h2>
+        <div>
+            <a href="{% url 'exportar_folha' 'xls' %}" class="btn btn-success btn-sm">
+                <i class="fas fa-file-excel"></i> Excel
+            </a>
+            <a href="{% url 'exportar_folha' 'txt' %}" class="btn btn-secondary btn-sm">
+                <i class="fas fa-file-alt"></i> TXT
+            </a>
+            <a href="{% url 'exportar_folha' 'pdf' %}" class="btn btn-danger btn-sm" target="_blank">
+                <i class="fas fa-file-pdf"></i> PDF
+            </a>
         </div>
     </div>
-    <div class="row mb-4">
-        <div class="col-md-6"><div class="card bg-primary text-white p-3"><h5>Total Bruto</h5><h3>R$ {{ total_bruto|floatformat:2 }}</h3></div></div>
-        <div class="col-md-6"><div class="card bg-success text-white p-3"><h5>Total Líquido</h5><h3>R$ {{ total_liquido|floatformat:2 }}</h3></div></div>
-    </div>
-    <div class="card border-0 shadow-sm rounded-4"><div class="card-body p-0"><div class="table-responsive">
-        <table class="table table-hover mb-0">
-            <thead class="table-light"><tr><th class="ps-4">Nome</th><th>Cargo</th><th>Bruto</th><th>Descontos</th><th>Líquido</th></tr></thead>
+
+    <div class="table-responsive">
+        <table class="table table-striped table-hover table-bordered">
+            <thead class="table-dark">
+                <tr>
+                    <th>Matrícula</th>
+                    <th>Nome</th>
+                    <th>Cargo</th>
+                    <th class="text-end">Total Proventos</th>
+                    <th class="text-end">Total Descontos</th>
+                    <th class="text-end bg-secondary text-white">Líquido</th>
+                    <th class="text-center">Ações</th>
+                </tr>
+            </thead>
             <tbody>
-                {% for f in funcionarios %}
-                <tr><td class="ps-4">{{ f.nome_completo }}</td><td>{{ f.cargo }}</td><td>R$ {{ f.salario }}</td><td class="text-danger">R$ {{ f.total_descontos|floatformat:2 }}</td><td class="text-success fw-bold">R$ {{ f.salario_liquido|floatformat:2 }}</td></tr>
-                {% empty %}<tr><td colspan="5" class="text-center py-4">Nenhum ativo.</td></tr>
+                {% for item in dados_folha %}
+                <tr>
+                    <td>{{ item.funcionario.matricula }}</td>
+                    <td>{{ item.funcionario.nome_completo }}</td>
+                    <td>{{ item.cargo }}</td>
+                    <td class="text-end text-primary">{{ item.total_vencimentos|floatformat:2 }}</td>
+                    <td class="text-end text-danger">{{ item.total_descontos|floatformat:2 }}</td>
+                    <td class="text-end fw-bold">{{ item.liquido|floatformat:2 }}</td>
+                    <td class="text-center">
+                        <a href="{% url 'visualizar_contracheque' item.funcionario.id %}" class="btn btn-sm btn-info" title="Ver Contracheque">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                    </td>
+                </tr>
                 {% endfor %}
             </tbody>
+            <tfoot class="table-secondary fw-bold">
+                <tr>
+                    <td colspan="3" class="text-end">TOTAIS GERAIS:</td>
+                    <td class="text-end">{{ total_geral_vencimentos|floatformat:2 }}</td>
+                    <td class="text-end">{{ total_geral_descontos|floatformat:2 }}</td>
+                    <td class="text-end">{{ total_geral_liquido|floatformat:2 }}</td>
+                    <td></td>
+                </tr>
+            </tfoot>
         </table>
-    </div></div></div>
+    </div>
 </div>
 {% endblock %}

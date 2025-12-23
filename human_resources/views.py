@@ -10,9 +10,12 @@ from django.http import HttpResponse
 from django.template.loader import render_to_string
 from xhtml2pdf import pisa 
 import openpyxl 
+import csv # Importante para exportação TXT
 
 from .forms import FuncionarioForm
 from .models import Funcionario, LancamentoMensal
+
+# --- VIEWS DE NAVEGAÇÃO E CADASTRO (Mantidas) ---
 
 @login_required
 def home_rh(request):
@@ -55,13 +58,15 @@ def cadastro_funcionario(request):
         'id_editar': id_editar, 'funcionario_editando': funcionario_instance, 'historico': historico
     })
 
-# --- FUNÇÕES DE CÁLCULO DINÂMICO ---
+# --- FUNÇÕES DE CÁLCULO (Atualizadas para o cálculo correto) ---
 
 def calcular_inss_sobre_base(base_calculo):
     teto = Decimal('7786.02')
+    base_calculo = base_calculo or Decimal(0)
     if base_calculo > teto: return Decimal('908.85')
     
     desc = Decimal(0)
+    # Tabela progressiva 2024
     faixas = [
         (Decimal('1412.00'), Decimal('0.075')),
         (Decimal('2666.68'), Decimal('0.09')),
@@ -73,13 +78,24 @@ def calcular_inss_sobre_base(base_calculo):
         if base_calculo > base_anterior:
             base_faixa = min(base_calculo, limite) - base_anterior
             desc += base_faixa * aliquota
+            # Ajuste da dedução da faixa (simplificado pela lógica progressiva direta)
             base_anterior = limite
         else:
             break
-    return desc
+    
+    # Alternativa simplificada com dedução padrão para bater com calculadoras online:
+    # Faixa 1: 7.5%
+    # Faixa 2: 9% - 21.18
+    # Faixa 3: 12% - 101.18
+    # Faixa 4: 14% - 181.18
+    if base_calculo <= 1412.00: return base_calculo * Decimal('0.075')
+    elif base_calculo <= 2666.68: return (base_calculo * Decimal('0.09')) - Decimal('21.18')
+    elif base_calculo <= 4000.03: return (base_calculo * Decimal('0.12')) - Decimal('101.18')
+    elif base_calculo <= 7786.02: return (base_calculo * Decimal('0.14')) - Decimal('181.18')
+    else: return Decimal('908.85')
 
 def calcular_irpf_sobre_base(base_tributavel):
-    # Tabela 2024/2025
+    base_tributavel = base_tributavel or Decimal(0)
     if base_tributavel <= Decimal('2259.20'): return Decimal(0)
     elif base_tributavel <= Decimal('2826.65'): return (base_tributavel * Decimal('0.075')) - Decimal('169.44')
     elif base_tributavel <= Decimal('3751.05'): return (base_tributavel * Decimal('0.15')) - Decimal('381.44')
@@ -90,49 +106,37 @@ def _get_contracheque_context(f):
     now = datetime.datetime.now()
     mes_ref = now.strftime("%m/%Y")
     
-    # 1. Recuperar eventos variáveis lançados para este mês
     lancamentos = LancamentoMensal.objects.filter(funcionario=f, mes_referencia=mes_ref)
     
     itens_holerite = []
     
-    # Adiciona Salário Base como o primeiro item
+    # Salário Base
     itens_holerite.append({
-        'codigo': '001', 
-        'descricao': 'SALARIO BASE', 
-        'ref': '30d', 
-        'vencimento': f.salario, 
-        'desconto': Decimal(0)
+        'codigo': '001', 'descricao': 'SALARIO BASE', 'ref': '30d', 
+        'vencimento': f.salario, 'desconto': Decimal(0)
     })
     
-    # Variáveis acumuladoras
     total_vencimentos = f.salario or Decimal(0)
     total_descontos = Decimal(0)
     base_inss = f.salario or Decimal(0)
     
-    # 2. Processa lançamentos variáveis (ex: Hora Extra, Atrasos)
+    # Eventos variáveis
     for l in lancamentos:
         if l.evento.tipo == 'V':
             itens_holerite.append({
-                'codigo': l.evento.codigo, 
-                'descricao': l.evento.nome, 
-                'ref': l.quantidade or '-', 
-                'vencimento': l.valor, 
-                'desconto': 0
+                'codigo': l.evento.codigo, 'descricao': l.evento.nome, 
+                'ref': l.quantidade or '-', 'vencimento': l.valor, 'desconto': 0
             })
             total_vencimentos += l.valor
-            if l.evento.incide_inss: 
-                base_inss += l.valor
+            if l.evento.incide_inss: base_inss += l.valor
         else:
             itens_holerite.append({
-                'codigo': l.evento.codigo, 
-                'descricao': l.evento.nome, 
-                'ref': l.quantidade or '-', 
-                'vencimento': 0, 
-                'desconto': l.valor
+                'codigo': l.evento.codigo, 'descricao': l.evento.nome, 
+                'ref': l.quantidade or '-', 'vencimento': 0, 'desconto': l.valor
             })
             total_descontos += l.valor
 
-    # 3. Calcular Impostos (INSS e IRRF)
+    # Impostos
     val_inss = calcular_inss_sobre_base(base_inss)
     if val_inss > 0:
         itens_holerite.append({'codigo': '901', 'descricao': 'INSS', 'ref': 'Tab.', 'vencimento': 0, 'desconto': val_inss})
@@ -144,7 +148,7 @@ def _get_contracheque_context(f):
         itens_holerite.append({'codigo': '911', 'descricao': 'IRRF', 'ref': 'Tab.', 'vencimento': 0, 'desconto': val_irrf})
         total_descontos += val_irrf
 
-    # 4. Adicionar descontos fixos (Benefícios antigos)
+    # Fixos
     fixos = [
         ('920', 'VALE TRANSPORTE', f.desc_vale_transporte),
         ('921', 'VALE ALIMENTACAO', f.desc_vale_alimentacao),
@@ -156,7 +160,6 @@ def _get_contracheque_context(f):
             itens_holerite.append({'codigo': cod, 'descricao': desc, 'ref': '-', 'vencimento': 0, 'desconto': val})
             total_descontos += val
 
-    # 5. Cálculo Final do Líquido
     salario_liquido = total_vencimentos - total_descontos
 
     return {
@@ -164,43 +167,15 @@ def _get_contracheque_context(f):
         'mes_referencia': mes_ref,
         'data_emissao': now,
         'itens_holerite': itens_holerite,
-        'total_vencimentos': total_vencimentos,  # Essencial para o total positivo
-        'total_descontos': total_descontos,      # Essencial para o total negativo
-        'salario_liquido': salario_liquido,      # Essencial para o líquido
+        'total_vencimentos': total_vencimentos,
+        'total_descontos': total_descontos,
+        'salario_liquido': salario_liquido,
         'base_inss': base_inss,
         'base_irrf': base_irrf,
         'fgts': base_inss * Decimal('0.08'),
     }
 
-# --- VIEWS DA FOLHA ---
-
-@login_required
-def folha_pagamento(request):
-    funcionarios = Funcionario.objects.filter(desligado=False)
-    
-    # Processa dados para a lista, reutilizando lógica simplificada
-    lista_funcionarios = []
-    total_bruto_geral = Decimal(0)
-    total_liquido_geral = Decimal(0)
-
-    for f in funcionarios:
-        ctx = _get_contracheque_context(f)
-        bruto = f.salario # Simplificado para lista, ou ctx['total_vencimentos'] se quiser exato
-        # Se quiser usar o valor exato calculado com variáveis:
-        # bruto = sum(item['vencimento'] for item in ctx['itens_holerite'])
-        
-        f.total_descontos_calc = ctx['total_descontos']
-        f.salario_liquido_calc = ctx['salario_liquido']
-        
-        total_bruto_geral += bruto
-        total_liquido_geral += ctx['salario_liquido']
-        lista_funcionarios.append(f)
-
-    return render(request, 'human_resources/folha_de_pagamento.html', {
-        'funcionarios': lista_funcionarios, 
-        'total_bruto': total_bruto_geral, 
-        'total_liquido': total_liquido_geral
-    })
+# --- VIEWS DA FOLHA E CONTRACHEQUE ---
 
 @login_required
 def exportar_folha(request, formato):
@@ -214,14 +189,15 @@ def exportar_folha(request, formato):
     for f in funcionarios:
         ctx = _get_contracheque_context(f)
         dados_processados.append({
+            'matricula': f.id,  # CORREÇÃO: Usamos f.id no lugar de f.matricula
             'nome': f.nome_completo,
             'cpf': f.cpf,
             'cargo': f.cargo,
-            'bruto': f.salario,
+            'bruto': ctx['total_vencimentos'], # Melhor usar o total calculado
             'desc': ctx['total_descontos'],
             'liq': ctx['salario_liquido']
         })
-        tot_bruto += f.salario or 0
+        tot_bruto += ctx['total_vencimentos']
         tot_liq += ctx['salario_liquido']
 
     if formato == 'xls':
@@ -229,32 +205,38 @@ def exportar_folha(request, formato):
         response['Content-Disposition'] = f'attachment; filename="Folha_{date_str}.xlsx"'
         wb = openpyxl.Workbook()
         ws = wb.active
-        ws.append(['Nome', 'CPF', 'Cargo', 'Salário', 'Descontos', 'Líquido'])
+        # Cabeçalho atualizado
+        ws.append(['Matrícula', 'Nome', 'CPF', 'Cargo', 'Salário Bruto', 'Descontos', 'Líquido'])
         for d in dados_processados:
-            ws.append([d['nome'], d['cpf'], d['cargo'], d['bruto'], d['desc'], d['liq']])
+            ws.append([d['matricula'], d['nome'], d['cpf'], d['cargo'], float(d['bruto']), float(d['desc']), float(d['liq'])])
         ws.append([]) 
-        ws.append(['TOTAIS GERAIS', '', '', tot_bruto, '', tot_liq])
+        ws.append(['TOTAIS GERAIS', '', '', '', float(tot_bruto), '', float(tot_liq)])
         wb.save(response)
         return response
 
     elif formato == 'txt':
         response = HttpResponse(content_type='text/plain')
         response['Content-Disposition'] = f'attachment; filename="Folha_{date_str}.txt"'
-        lines = [f"FOLHA - {date_str}\n", "-"*90+"\n"]
-        lines.append(f"{'NOME':<30} | {'BRUTO':<10} | {'LIQUIDO':<10}\n")
+        lines = [f"FOLHA - {date_str}\n", "="*100+"\n"]
+        # Ajuste nas colunas do TXT
+        lines.append(f"{'MAT':<5} | {'NOME':<30} | {'BRUTO':<12} | {'LIQUIDO':<12}\n")
+        lines.append("-" * 100 + "\n")
+        
         for d in dados_processados:
-            lines.append(f"{d['nome'][:30]:<30} | {str(d['bruto']):<10} | {str(d['liq']):<10}\n")
-        lines.append("-" * 90 + "\n")
-        lines.append(f"{'TOTAIS':<30} | {tot_bruto:<10} | {tot_liq:<10}\n")
+            lines.append(f"{str(d['matricula']):<5} | {d['nome'][:30]:<30} | {d['bruto']:>12.2f} | {d['liq']:>12.2f}\n")
+            
+        lines.append("-" * 100 + "\n")
+        lines.append(f"{'TOTAL':<38} | {tot_bruto:>12.2f} | {tot_liq:>12.2f}\n")
         response.writelines(lines)
         return response
 
     elif formato == 'pdf':
-        # Nota: Ajustar template PDF para receber os dados calculados se necessário
-        # Por simplicidade, enviamos objetos, mas o ideal seria enviar dicionarios processados
-        context = {'funcionarios': funcionarios, 'total_bruto': tot_bruto, 'total_liquido': tot_liq} 
-        # ATENÇÃO: O template PDF atual pode precisar de ajustes pois 'f.total_descontos' agora é um método property no model antigo
-        # mas aqui estamos calculando dinamicamente. Recomenda-se atualizar o template PDF também.
+        context = {
+            'dados_folha': dados_processados, # Passando a lista processada para o template
+            'total_geral_vencimentos': tot_bruto,
+            'total_geral_liquido': tot_liq,
+            'data_atual': datetime.datetime.now()
+        }
         
         html = render_to_string('human_resources/folha_pdf_template.html', context)
         response = HttpResponse(content_type='application/pdf')

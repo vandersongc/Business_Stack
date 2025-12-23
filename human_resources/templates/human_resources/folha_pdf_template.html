@@ -1,45 +1,53 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-br">
 <head>
-<meta charset="utf-8">
-<style>
-    @page { size: A4; margin: 1cm; }
-    body { font-family: Helvetica, Arial, sans-serif; font-size: 12px; }
-    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-    th { background-color: #2c3e50; color: white; padding: 5px; text-align: left; }
-    td { border-bottom: 1px solid #eee; padding: 5px; }
-    .total-row td { background-color: #ecf0f1; font-weight: bold; border-top: 2px solid #333; }
-    .right { text-align: right; }
-</style>
+    <meta charset="UTF-8">
+    <title>Relatório de Folha de Pagamento</title>
+    <style>
+        body { font-family: sans-serif; font-size: 10px; }
+        h2 { text-align: center; margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #000; padding: 5px; text-align: left; }
+        th { background-color: #eee; }
+        .right { text-align: right; }
+        .total-row { background-color: #ddd; font-weight: bold; }
+    </style>
 </head>
 <body>
-    <h1 style="text-align: center;">Relatório de Folha de Pagamento</h1>
-    <div style="text-align: center; color: #777;">Gerado em: {% now "d/m/Y H:i" %}</div>
-    <table class="main-table">
-        <thead><tr><th>Cód.</th><th>Descrição</th><th>Ref.</th><th class="right">Vencimentos</th><th class="right">Descontos</th></tr></thead>
-        <tbody>
-            {% for item in itens_holerite %}
+    <h2>Relatório de Folha de Pagamento</h2>
+    <p>Data de Emissão: {{ data_atual|date:"d/m/Y H:i" }}</p>
+
+    <table>
+        <thead>
             <tr>
-                <td>{{ item.codigo }}</td>
-                <td>{{ item.descricao }}</td>
-                <td>{{ item.ref }}</td>
-                <td class="right">{% if item.vencimento > 0 %}{{ item.vencimento|floatformat:2 }}{% endif %}</td>
-                <td class="right">{% if item.desconto > 0 %}{{ item.desconto|floatformat:2 }}{% endif %}</td>
+                <th width="10%">Matrícula</th>
+                <th width="30%">Funcionário</th>
+                <th width="20%">Cargo</th>
+                <th width="13%" class="right">Proventos</th>
+                <th width="13%" class="right">Descontos</th>
+                <th width="14%" class="right">Líquido</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in dados_folha %}
+            <tr>
+                <td>{{ item.funcionario.matricula }}</td>
+                <td>{{ item.funcionario.nome_completo }}</td>
+                <td>{{ item.cargo }}</td>
+                <td class="right">{{ item.total_vencimentos|floatformat:2 }}</td>
+                <td class="right">{{ item.total_descontos|floatformat:2 }}</td>
+                <td class="right"><strong>{{ item.liquido|floatformat:2 }}</strong></td>
             </tr>
             {% endfor %}
-            <tr style="height: 50px;"><td colspan="5"></td></tr>
         </tbody>
-    </table>
-    <table class="footer-table" style="background-color: #eee;">
-        <tr>
-            <td width="60%"></td>
-            <td width="20%">TOTAIS</td>
-            <td width="10%" class="right">{{ total_vencimentos|floatformat:2 }}</td>
-            <td width="10%" class="right">{{ total_descontos|floatformat:2 }}</td>
-        </tr>
-    </table>
-    <table class="footer-table">
-        <tr><td width="70%">LÍQUIDO A RECEBER -></td><td width="30%" class="right" style="border:1px solid #000;"><strong>R$ {{ salario_liquido|floatformat:2 }}</strong></td></tr>
+        <tfoot>
+            <tr class="total-row">
+                <td colspan="3" class="right">TOTAIS:</td>
+                <td class="right">{{ total_geral_vencimentos|floatformat:2 }}</td>
+                <td class="right">{{ total_geral_descontos|floatformat:2 }}</td>
+                <td class="right">{{ total_geral_liquido|floatformat:2 }}</td>
+            </tr>
+        </tfoot>
     </table>
 </body>
 </html>
