@@ -10,12 +10,12 @@ from django.http import HttpResponse
 from django.template.loader import render_to_string
 from xhtml2pdf import pisa 
 import openpyxl 
-import csv # Importante para exportação TXT
+import csv 
 
 from .forms import FuncionarioForm
 from .models import Funcionario, LancamentoMensal
 
-# --- VIEWS DE NAVEGAÇÃO E CADASTRO (Mantidas) ---
+# --- VIEWS DE NAVEGAÇÃO E CADASTRO ---
 
 @login_required
 def home_rh(request):
@@ -58,7 +58,7 @@ def cadastro_funcionario(request):
         'id_editar': id_editar, 'funcionario_editando': funcionario_instance, 'historico': historico
     })
 
-# --- FUNÇÕES DE CÁLCULO (Atualizadas para o cálculo correto) ---
+# --- FUNÇÕES DE CÁLCULO ---
 
 def calcular_inss_sobre_base(base_calculo):
     teto = Decimal('7786.02')
@@ -66,7 +66,6 @@ def calcular_inss_sobre_base(base_calculo):
     if base_calculo > teto: return Decimal('908.85')
     
     desc = Decimal(0)
-    # Tabela progressiva 2024
     faixas = [
         (Decimal('1412.00'), Decimal('0.075')),
         (Decimal('2666.68'), Decimal('0.09')),
@@ -78,16 +77,11 @@ def calcular_inss_sobre_base(base_calculo):
         if base_calculo > base_anterior:
             base_faixa = min(base_calculo, limite) - base_anterior
             desc += base_faixa * aliquota
-            # Ajuste da dedução da faixa (simplificado pela lógica progressiva direta)
             base_anterior = limite
         else:
             break
-    
-    # Alternativa simplificada com dedução padrão para bater com calculadoras online:
-    # Faixa 1: 7.5%
-    # Faixa 2: 9% - 21.18
-    # Faixa 3: 12% - 101.18
-    # Faixa 4: 14% - 181.18
+            
+    # Ajuste fino para bater com tabelas progressivas padrão
     if base_calculo <= 1412.00: return base_calculo * Decimal('0.075')
     elif base_calculo <= 2666.68: return (base_calculo * Decimal('0.09')) - Decimal('21.18')
     elif base_calculo <= 4000.03: return (base_calculo * Decimal('0.12')) - Decimal('101.18')
@@ -178,6 +172,41 @@ def _get_contracheque_context(f):
 # --- VIEWS DA FOLHA E CONTRACHEQUE ---
 
 @login_required
+def folha_pagamento(request):
+    """
+    View responsável por exibir a folha de pagamento geral na tela.
+    (Esta função estava faltando e causava o erro AttributeError)
+    """
+    funcionarios = Funcionario.objects.filter(desligado=False)
+    dados_folha = []
+    
+    tg_vencimentos = Decimal(0)
+    tg_descontos = Decimal(0)
+    tg_liquido = Decimal(0)
+
+    for f in funcionarios:
+        ctx = _get_contracheque_context(f)
+        dados_folha.append({
+            'funcionario': f,
+            'total_vencimentos': ctx['total_vencimentos'],
+            'total_descontos': ctx['total_descontos'],
+            'liquido': ctx['salario_liquido'],
+            'cargo': f.cargo
+        })
+        tg_vencimentos += ctx['total_vencimentos']
+        tg_descontos += ctx['total_descontos']
+        tg_liquido += ctx['salario_liquido']
+
+    context = {
+        'dados_folha': dados_folha,
+        'total_geral_vencimentos': tg_vencimentos,
+        'total_geral_descontos': tg_descontos,
+        'total_geral_liquido': tg_liquido,
+        'data_atual': datetime.datetime.now()
+    }
+    return render(request, 'human_resources/folha_de_pagamento.html', context)
+
+@login_required
 def exportar_folha(request, formato):
     funcionarios = Funcionario.objects.filter(desligado=False)
     date_str = datetime.datetime.now().strftime("%Y-%m-%d")
@@ -189,11 +218,11 @@ def exportar_folha(request, formato):
     for f in funcionarios:
         ctx = _get_contracheque_context(f)
         dados_processados.append({
-            'matricula': f.id,  # CORREÇÃO: Usamos f.id no lugar de f.matricula
+            'matricula': f.id, 
             'nome': f.nome_completo,
             'cpf': f.cpf,
             'cargo': f.cargo,
-            'bruto': ctx['total_vencimentos'], # Melhor usar o total calculado
+            'bruto': ctx['total_vencimentos'], 
             'desc': ctx['total_descontos'],
             'liq': ctx['salario_liquido']
         })
@@ -205,7 +234,6 @@ def exportar_folha(request, formato):
         response['Content-Disposition'] = f'attachment; filename="Folha_{date_str}.xlsx"'
         wb = openpyxl.Workbook()
         ws = wb.active
-        # Cabeçalho atualizado
         ws.append(['Matrícula', 'Nome', 'CPF', 'Cargo', 'Salário Bruto', 'Descontos', 'Líquido'])
         for d in dados_processados:
             ws.append([d['matricula'], d['nome'], d['cpf'], d['cargo'], float(d['bruto']), float(d['desc']), float(d['liq'])])
@@ -218,7 +246,6 @@ def exportar_folha(request, formato):
         response = HttpResponse(content_type='text/plain')
         response['Content-Disposition'] = f'attachment; filename="Folha_{date_str}.txt"'
         lines = [f"FOLHA - {date_str}\n", "="*100+"\n"]
-        # Ajuste nas colunas do TXT
         lines.append(f"{'MAT':<5} | {'NOME':<30} | {'BRUTO':<12} | {'LIQUIDO':<12}\n")
         lines.append("-" * 100 + "\n")
         
@@ -232,7 +259,7 @@ def exportar_folha(request, formato):
 
     elif formato == 'pdf':
         context = {
-            'dados_folha': dados_processados, # Passando a lista processada para o template
+            'dados_folha': dados_processados, 
             'total_geral_vencimentos': tot_bruto,
             'total_geral_liquido': tot_liq,
             'data_atual': datetime.datetime.now()

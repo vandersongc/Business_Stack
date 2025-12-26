@@ -1,50 +1,88 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="utf-8">
     <title>Relatório de Folha de Pagamento</title>
     <style>
-        body { font-family: sans-serif; font-size: 10px; }
-        h2 { text-align: center; margin-bottom: 20px; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { border: 1px solid #000; padding: 5px; text-align: left; }
-        th { background-color: #eee; }
+        /* Configuração da Página A4 em Paisagem */
+        @page {
+            size: a4 landscape; /* Define papel A4 deitado */
+            margin: 1cm;        /* Margens de 1cm em todos os lados */
+        }
+
+        body { 
+            font-family: Helvetica, sans-serif; 
+            font-size: 10px; /* Fonte levemente reduzida para caber tudo */
+        }
+
+        h2 { 
+            text-align: center; 
+            margin-bottom: 20px; 
+            text-transform: uppercase;
+        }
+
+        /* Tabela ocupando toda a largura */
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin-top: 10px; 
+        }
+
+        th, td { 
+            border: 1px solid #000; 
+            padding: 6px 4px; /* Padding ajustado */
+            text-align: left; 
+        }
+
+        th { 
+            background-color: #eee; 
+            font-weight: bold;
+        }
+
         .right { text-align: right; }
-        .total-row { background-color: #ddd; font-weight: bold; }
+        .center { text-align: center; }
+        
+        .total-row { 
+            background-color: #ddd; 
+            font-weight: bold; 
+            font-size: 11px;
+        }
     </style>
 </head>
 <body>
     <h2>Relatório de Folha de Pagamento</h2>
-    <p>Data de Emissão: {{ data_atual|date:"d/m/Y H:i" }}</p>
+    <p><strong>Data de Emissão:</strong> {{ data_atual|date:"d/m/Y H:i" }}</p>
 
     <table>
         <thead>
             <tr>
-                <th width="10%">Matrícula</th>
-                <th width="30%">Funcionário</th>
+                <th width="8%" class="center">Matrícula</th>
+                <th width="32%">Funcionário</th>
                 <th width="20%">Cargo</th>
-                <th width="13%" class="right">Proventos</th>
-                <th width="13%" class="right">Descontos</th>
-                <th width="14%" class="right">Líquido</th>
+                <th width="10%">CPF</th>
+                <th width="10%" class="right">Proventos</th>
+                <th width="10%" class="right">Descontos</th>
+                <th width="10%" class="right">Líquido</th>
             </tr>
         </thead>
         <tbody>
             {% for item in dados_folha %}
             <tr>
-                <td>{{ item.funcionario.matricula }}</td>
-                <td>{{ item.funcionario.nome_completo }}</td>
+                <td class="center">{{ item.matricula }}</td>
+                <td>{{ item.nome }}</td>
                 <td>{{ item.cargo }}</td>
-                <td class="right">{{ item.total_vencimentos|floatformat:2 }}</td>
-                <td class="right">{{ item.total_descontos|floatformat:2 }}</td>
-                <td class="right"><strong>{{ item.liquido|floatformat:2 }}</strong></td>
+                <td>{{ item.cpf }}</td>
+                <td class="right">{{ item.bruto|floatformat:2 }}</td>
+                <td class="right">{{ item.desc|floatformat:2 }}</td>
+                <td class="right"><strong>{{ item.liq|floatformat:2 }}</strong></td>
             </tr>
             {% endfor %}
         </tbody>
         <tfoot>
             <tr class="total-row">
-                <td colspan="3" class="right">TOTAIS:</td>
+                <td colspan="4" class="right">TOTAIS GERAIS:</td>
                 <td class="right">{{ total_geral_vencimentos|floatformat:2 }}</td>
-                <td class="right">{{ total_geral_descontos|floatformat:2 }}</td>
+                <td class="right">-</td> 
                 <td class="right">{{ total_geral_liquido|floatformat:2 }}</td>
             </tr>
         </tfoot>

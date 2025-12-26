@@ -1,66 +1,141 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-br">
 <head>
-<meta charset="utf-8">
-<style>
-    @page { size: A4; margin: 1cm; }
-    body { font-family: Helvetica, Arial, sans-serif; font-size: 10px; }
-    .container { border: 1px solid #000; }
-    table { width: 100%; border-collapse: collapse; }
-    td { padding: 3px; }
-    .header-table { border-bottom: 1px solid #000; }
-    .main-table th { border-top: 1px solid #000; border-bottom: 1px solid #000; text-align: left; }
-    .footer-table { border-top: 1px solid #000; }
-    .right { text-align: right; }
-</style>
+    <meta charset="UTF-8">
+    <title>Contracheque</title>
+    <style>
+        /* Configuração da Página A4 em Retrato */
+        @page {
+            size: a4 portrait;
+            margin: 1.5cm; /* Margem confortável */
+        }
+
+        body { 
+            font-family: Helvetica, Arial, sans-serif; 
+            font-size: 12px; 
+        }
+
+        /* Container principal */
+        .container { 
+            width: 100%; 
+            border: 1px solid #000; 
+            padding: 10px; 
+            box-sizing: border-box; /* Garante que padding não estoure a largura */
+        }
+
+        .header { 
+            text-align: center; 
+            margin-bottom: 15px; 
+            border-bottom: 2px solid #000; 
+            padding-bottom: 10px; 
+        }
+        
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin-bottom: 10px; 
+        }
+
+        th, td { 
+            border: 1px solid #000; 
+            padding: 5px; 
+        }
+        
+        th { background-color: #f2f2f2; text-align: left; }
+        
+        .right { text-align: right; }
+        .no-border td { border: none; }
+        
+        .footer-box { 
+            border: 1px solid #000; 
+            padding: 8px; 
+            background-color: #eee; 
+            margin-top: 5px; 
+        }
+    </style>
 </head>
 <body>
-<div class="container">
-    <table class="header-table">
-        <tr>
-            <td width="60%"><strong>BUSINESS STACK S.A.</strong><br>CNPJ: 00.000.000/0001-00</td>
-            <td width="40%" class="right"><strong>RECIBO DE PAGAMENTO</strong><br>Ref: {{ mes_referencia }} | Mensal</td>
-        </tr>
-    </table>
-    <table>
-        <tr>
-            <td width="10%"><strong>ID</strong><br>{{ f.id }}</td>
-            <td width="40%"><strong>NOME</strong><br>{{ f.nome_completo|upper }}</td>
-            <td width="25%"><strong>CARGO</strong><br>{{ f.cargo|upper }}</td>
-            <td width="25%"><strong>LOTAÇÃO</strong><br>{{ f.lotacao|default:"-"|upper }}</td>
-        </tr>
-        <tr>
-            <td colspan="4"><strong>BANCO/AG/CONTA:</strong> {{ f.banco|default:"-" }} / {{ f.agencia|default:"-" }} / {{ f.conta|default:"-" }}</td>
-        </tr>
-    </table>
-    <table class="main-table">
-        <thead><tr><th>Cód.</th><th>Descrição</th><th>Ref.</th><th class="right">Vencimentos</th><th class="right">Descontos</th></tr></thead>
-        <tbody>
-            <tr><td>001</td><td>SALARIO</td><td>30d</td><td class="right">{{ f.salario|floatformat:2 }}</td><td></td></tr>
-            <tr><td>901</td><td>INSS</td><td>Tab.</td><td></td><td class="right">{{ inss|floatformat:2 }}</td></tr>
-            {% if irpf > 0 %}<tr><td>911</td><td>IRRF</td><td>Tab.</td><td></td><td class="right">{{ irpf|floatformat:2 }}</td></tr>{% endif %}
-            {% if f.desc_vale_transporte > 0 %}<tr><td>920</td><td>VALE TRANSPORTE</td><td>-</td><td></td><td class="right">{{ f.desc_vale_transporte }}</td></tr>{% endif %}
-            {% if f.desc_vale_alimentacao > 0 %}<tr><td>921</td><td>VALE ALIMENTACAO</td><td>-</td><td></td><td class="right">{{ f.desc_vale_alimentacao }}</td></tr>{% endif %}
-            {% if f.desc_assist_medica > 0 %}<tr><td>922</td><td>ASS. MEDICA</td><td>-</td><td></td><td class="right">{{ f.desc_assist_medica }}</td></tr>{% endif %}
-            {% if f.desc_assist_odonto > 0 %}<tr><td>923</td><td>ASS. ODONTO</td><td>-</td><td></td><td class="right">{{ f.desc_assist_odonto }}</td></tr>{% endif %}
-            <tr style="height: 100px;"><td colspan="5"></td></tr>
-        </tbody>
-    </table>
-    <table class="footer-table" style="background-color: #eee;">
-        <tr><td width="60%"></td><td width="20%">TOTAIS</td><td width="10%" class="right">{{ f.salario|floatformat:2 }}</td><td width="10%" class="right">{{ f.total_descontos|floatformat:2 }}</td></tr>
-    </table>
-    <table class="footer-table">
-        <tr><td width="70%">LÍQUIDO A RECEBER -></td><td width="30%" class="right" style="border:1px solid #000;"><strong>R$ {{ f.salario_liquido|floatformat:2 }}</strong></td></tr>
-    </table>
-    <table>
-        <tr>
-            <td>Sal. Base: {{ f.salario }}</td><td>Base INSS: {{ f.salario }}</td><td>Base FGTS: {{ f.salario }}</td><td>FGTS Mês: {{ fgts|floatformat:2 }}</td><td>Base IRRF: {{ base_irrf|floatformat:2 }}</td>
-        </tr>
-    </table>
-</div>
-<div style="text-align: center; font-size: 9px; margin-top: 20px;">
-    Declaro ter recebido a importância líquida discriminada neste recibo.<br><br>
-    _____/_____/__________ ________________________________________________________
-</div>
+    <div class="container">
+        <div class="header">
+            <h2>RECIBO DE PAGAMENTO DE SALÁRIO</h2>
+            <p>Referência: {{ mes_referencia }}</p>
+        </div>
+
+        <table style="border: none; margin-bottom: 15px;">
+            <tr style="border: none;">
+                <td style="border: none;" width="60%"><strong>Empresa:</strong> GION TECH SOLUTIONS</td>
+                <td style="border: none;" width="40%" class="right"><strong>CNPJ:</strong> 00.000.000/0001-00</td>
+            </tr>
+            <tr style="border: none;">
+                <td style="border: none;"><strong>Funcionário:</strong> {{ f.nome_completo }}</td>
+                <td style="border: none;" class="right"><strong>Matrícula:</strong> {{ f.id }}</td>
+            </tr>
+            <tr style="border: none;">
+                <td style="border: none;"><strong>Cargo:</strong> {{ f.cargo }}</td>
+                <td style="border: none;"></td>
+            </tr>
+        </table>
+
+        <table>
+            <thead>
+                <tr>
+                    <th width="10%">Cód.</th>
+                    <th width="45%">Descrição</th>
+                    <th width="10%">Ref.</th>
+                    <th width="17.5%" class="right">Vencimentos</th>
+                    <th width="17.5%" class="right">Descontos</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in itens_holerite %}
+                <tr>
+                    <td>{{ item.codigo }}</td>
+                    <td>{{ item.descricao }}</td>
+                    <td>{{ item.ref }}</td>
+                    <td class="right">{% if item.vencimento > 0 %}{{ item.vencimento|floatformat:2 }}{% endif %}</td>
+                    <td class="right">{% if item.desconto > 0 %}{{ item.desconto|floatformat:2 }}{% endif %}</td>
+                </tr>
+                {% endfor %}
+                
+                {% if itens_holerite|length < 8 %}
+                    <tr><td colspan="5" style="height: 20px; border-left: 1px solid #000; border-right: 1px solid #000;"></td></tr>
+                    <tr><td colspan="5" style="height: 20px; border-left: 1px solid #000; border-right: 1px solid #000;"></td></tr>
+                {% endif %}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="3" class="right"><strong>TOTAIS</strong></td>
+                    <td class="right"><strong>{{ total_vencimentos|floatformat:2 }}</strong></td>
+                    <td class="right"><strong>{{ total_descontos|floatformat:2 }}</strong></td>
+                </tr>
+            </tfoot>
+        </table>
+
+        <div class="footer-box">
+            <table style="width: 100%; border: none;">
+                <tr style="border: none;">
+                    <td style="border: none;"><strong>LÍQUIDO A RECEBER</strong></td>
+                    <td style="border: none;" class="right"><strong style="font-size: 14px;">R$ {{ salario_liquido|floatformat:2 }}</strong></td>
+                </tr>
+            </table>
+        </div>
+
+        <div style="margin-top: 10px; font-size: 9px;">
+            <table style="border: none;">
+                <tr style="border: none;">
+                    <td style="border: none;">Sal. Base: {{ f.salario|floatformat:2 }}</td>
+                    <td style="border: none;">Base INSS: {{ base_inss|floatformat:2 }}</td>
+                    <td style="border: none;">Base IRRF: {{ base_irrf|floatformat:2 }}</td>
+                    <td style="border: none;">FGTS Mês: {{ fgts|floatformat:2 }}</td>
+                </tr>
+            </table>
+        </div>
+        
+        <br><br><br>
+        <div style="text-align: center; font-size: 10px; margin-top: 20px;">
+            __________________________________________________________________<br>
+            Assinatura do Funcionário
+        </div>
+    </div>
 </body>
 </html>
