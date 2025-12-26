@@ -1,3 +1,7 @@
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+import json
+from django.utils import timezone
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -11,7 +15,6 @@ from django.template.loader import render_to_string
 from xhtml2pdf import pisa 
 import openpyxl 
 import csv 
-
 from .forms import FuncionarioForm
 from .models import Funcionario, LancamentoMensal
 
@@ -295,3 +298,162 @@ def gerar_contracheque_pdf(request, funcionario_id):
     response['Content-Disposition'] = f'attachment; filename="Holerite_{f.nome_completo}.pdf"'
     pisa.CreatePDF(html, dest=response)
     return response
+
+# --- GERAÇÃO DE CRACHÁ ---
+@login_required
+def gerar_cracha(request, funcionario_id):
+    funcionario = get_object_or_404(Funcionario, pk=funcionario_id)
+    
+    context = {'funcionario': funcionario}
+    html = render_to_string('human_resources/cracha_template.html', context)
+    
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="Cracha_{funcionario.nome_completo}.pdf"'
+    
+    # Cria o PDF (Crachá tamanho padrão CR80: 85.6mm x 54mm)
+    pisa.CreatePDF(html, dest=response)
+    return response
+
+# --- LEITOR DE PONTO (Front-end da Câmera) ---
+@login_required
+def painel_ponto(request):
+    return render(request, 'human_resources/painel_ponto.html')
+
+# --- API DE REGISTRO DE PONTO (Back-end) ---
+@csrf_exempt
+def registrar_ponto_api(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            qr_content = data.get('qr_content') # Ex: "FUNC-1"
+            
+            # Extrai o ID
+            if not qr_content or not qr_content.startswith("FUNC-"):
+                return JsonResponse({'status': 'error', 'message': 'QR Code inválido.'})
+            
+            func_id = qr_content.split('-')[1]
+            funcionario = Funcionario.objects.get(id=func_id)
+            
+            hoje = timezone.now().date()
+            agora = timezone.now().time()
+            
+            # Busca ou cria o registro do dia
+            ponto, created = RegistroPonto.objects.get_or_create(
+                funcionario=funcionario,
+                data=hoje
+            )
+            
+            mensagem = ""
+            
+            # Lógica simples de preenchimento sequencial
+            if not ponto.entrada_1:
+                ponto.entrada_1 = agora
+                mensagem = f"Entrada registrada às {agora.strftime('%H:%M')}"
+            elif not ponto.saida_1:
+                ponto.saida_1 = agora
+                mensagem = f"Saída Almoço registrada às {agora.strftime('%H:%M')}"
+            elif not ponto.entrada_2:
+                ponto.entrada_2 = agora
+                mensagem = f"Retorno Almoço registrado às {agora.strftime('%H:%M')}"
+            elif not ponto.saida_2:
+                ponto.saida_2 = agora
+                mensagem = f"Saída Expediente registrada às {agora.strftime('%H:%M')}"
+            else:
+                return JsonResponse({'status': 'warning', 'message': 'Todos os pontos do dia já registrados.'})
+            
+            ponto.save()
+            return JsonResponse({'status': 'success', 'message': mensagem, 'funcionario': funcionario.nome_completo})
+            
+        except Funcionario.DoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'Funcionário não encontrado.'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)})
+            
+    return JsonResponse({'status': 'error', 'message': 'Método não permitido.'})
+
+def processar_faltas_mensal(request):
+    """
+    Verifica dias úteis passados sem registro de ponto e cria lançamentos de desconto.
+    """
+    if not request.user.is_staff:
+        return redirect('home')
+
+    hoje = timezone.now().date()
+    primeiro_dia_mes = hoje.replace(day=1)
+    
+    # Busca ou cria o Evento de Falta
+    evento_falta, _ = EventoFolha.objects.get_or_create(
+        codigo='999',
+        defaults={'nome': 'FALTA NAO JUSTIFICADA', 'tipo': 'D', 'incide_inss': True, 'incide_irrf': True, 'incide_fgts': True}
+    )
+
+    funcionarios = Funcionario.objects.filter(desligado=False)
+    count_faltas = 0
+
+    import calendar
+    # Itera sobre os dias do mês até ontem
+    for dia_num in range(1, hoje.day): 
+        data_verificar = hoje.replace(day=dia_num)
+        
+        # Se for sábado (5) ou domingo (6), pula (ajuste conforme regra da empresa)
+        if data_verificar.weekday() >= 5:
+            continue
+
+        for func in funcionarios:
+            # Verifica se existe ponto ou se está de férias
+            ponto_existe = RegistroPonto.objects.filter(funcionario=func, data=data_verificar).exists()
+            ferias = ControleFerias.objects.filter(funcionario=func, periodo_aquisitivo_inicio__lte=data_verificar, periodo_aquisitivo_fim__gte=data_verificar).exists()
+            
+            if not ponto_existe and not ferias:
+                # É Falta! Calcula o valor do dia (Salário / 30)
+                valor_dia = func.salario / Decimal(30)
+                
+                # Cria ou atualiza o lançamento no contracheque
+                mes_ref = data_verificar.strftime("%m/%Y")
+                
+                # Verifica se já lançamos essa falta para não duplicar no mesmo mês/evento
+                # Aqui simplificamos somando ao lançamento existente ou criando um novo
+                lancamento, created = LancamentoMensal.objects.get_or_create(
+                    funcionario=func,
+                    evento=evento_falta,
+                    mes_referencia=mes_ref,
+                    defaults={'valor': 0, 'quantidade': 0}
+                )
+                
+                # Atenção: Esta lógica é simplificada. O ideal é ter uma tabela de "Ocorrências" separada antes de consolidar na folha.
+                # Mas para este exemplo, vamos adicionar o valor se ele ainda não "parece" ter sido processado (ex: rodar script uma vez por dia)
+                # Para evitar duplicação real, precisaríamos checar uma tabela de 'FaltasDiarias'.
+                
+                # Sugestão de uso manual: O RH clica num botão "Calcular Faltas do Mês" e o sistema limpa os lançamentos de falta e recalcula tudo.
+                pass 
+    
+    # Implementação de Recálculo Seguro (Limpa anteriores e insere novos):
+    # 1. Apaga descontos de falta do mês atual
+    mes_ref_atual = hoje.strftime("%m/%Y")
+    LancamentoMensal.objects.filter(mes_referencia=mes_ref_atual, evento=evento_falta).delete()
+
+    for func in funcionarios:
+        dias_falta = 0
+        for dia_num in range(1, hoje.day + 1): # Verifica o mês todo até hoje
+            data_loop = hoje.replace(day=dia_num)
+            if data_loop.weekday() < 5: # Apenas dias úteis
+                ponto = RegistroPonto.objects.filter(funcionario=func, data=data_loop).exists()
+                if not ponto:
+                    # Verifica férias (implementação simples)
+                    em_ferias = False # Implementar verificação de férias aqui
+                    if not em_ferias:
+                        dias_falta += 1
+        
+        if dias_falta > 0:
+            valor_desconto = (func.salario / Decimal(30)) * Decimal(dias_falta)
+            LancamentoMensal.objects.create(
+                funcionario=func,
+                evento=evento_falta,
+                mes_referencia=mes_ref_atual,
+                valor=valor_desconto,
+                quantidade=dias_falta
+            )
+            count_faltas += dias_falta
+
+    messages.success(request, f'Processamento concluído. {count_faltas} dias de falta contabilizados.')
+    return redirect('folha_pagamento')

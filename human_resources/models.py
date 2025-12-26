@@ -1,3 +1,7 @@
+import qrcode
+from io import BytesIO
+from django.core.files import File
+from PIL import Image, ImageDraw
 from django.db import models
 from decimal import Decimal
 from django.utils import timezone
@@ -59,6 +63,22 @@ class Funcionario(models.Model):
 
     def __str__(self):
         return self.nome_completo
+    
+    foto = models.ImageField(upload_to='funcionarios/fotos/', blank=True, null=True, verbose_name="Foto 3x4")
+    qr_code_img = models.ImageField(upload_to='funcionarios/qr_codes/', blank=True, null=True)
+
+    def save(self, *args, **kwargs):
+        # Gera o QR Code automaticamente ao salvar se não existir
+        if not self.qr_code_img:
+            qrcode_img = qrcode.make(f"FUNC-{self.id}") # O QR Code conterá o ID
+            canvas = Image.new('RGB', (290, 290), 'white')
+            draw = ImageDraw.Draw(canvas)
+            canvas.paste(qrcode_img)
+            fname = f'qr_code-{self.nome_completo}.png'
+            buffer = BytesIO()
+            canvas.save(buffer, 'PNG')
+            self.qr_code_img.save(fname, File(buffer), save=False)
+        super().save(*args, **kwargs)
 
 # === MÓDULO 1: ADMINISTRAÇÃO DE PESSOAL (Novos) ===
 

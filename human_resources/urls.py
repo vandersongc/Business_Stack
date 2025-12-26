@@ -31,4 +31,10 @@ urlpatterns = [
     path('contracheque/visualizar/<int:funcionario_id>/', rh_views.visualizar_contracheque, name='visualizar_contracheque'),
     path('contracheque/pdf/<int:funcionario_id>/', rh_views.gerar_contracheque_pdf, name='gerar_contracheque_pdf'),
 
+     # Visualização de crachá, ponto e faltas.
+    path('cracha/<int:funcionario_id>/', rh_views.gerar_cracha, name='gerar_cracha'),
+    path('ponto/painel/', rh_views.painel_ponto, name='painel_ponto'),
+    path('api/registrar_ponto/', rh_views.registrar_ponto_api, name='registrar_ponto_api'),
+    path('folha/processar_faltas/', rh_views.processar_faltas_mensal, name='processar_faltas'),
+
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
