@@ -1,16 +1,29 @@
-from django.views.decorators.csrf import csrf_exempt
+import os
+from django.conf import settings
+import datetime
+from decimal import Decimal
+from django.http import HttpResponse
+from django.template.loader import render_to_string
+from xhtml2pdf import pisa 
+import openpyxl 
+import csv 
+from .forms import FuncionarioForm
+from .models import Funcionario, LancamentoMensal, RegistroPonto, EventoFolha, ControleFerias
 from django.http import JsonResponse
 import json
 from django.utils import timezone
+from .models import Funcionario, RegistroPonto
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.http import HttpResponse, JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import json
 from django.db.models import Q 
 from django.contrib.admin.models import LogEntry, ADDITION, CHANGE
 from django.contrib.contenttypes.models import ContentType
 import datetime
 from decimal import Decimal
-from django.http import HttpResponse
 from django.template.loader import render_to_string
 from xhtml2pdf import pisa 
 import openpyxl 
@@ -40,7 +53,8 @@ def cadastro_funcionario(request):
         funcionario_instance = get_object_or_404(Funcionario, pk=id_editar)
 
     if request.method == 'POST':
-        form = FuncionarioForm(request.POST, instance=funcionario_instance)
+        # ALTERAÇÃO AQUI: Adicionado request.FILES para upload de arquivos
+        form = FuncionarioForm(request.POST, request.FILES, instance=funcionario_instance)
         if form.is_valid():
             acao_flag = CHANGE if funcionario_instance else ADDITION
             msg = "Atualização via Sistema RH" if funcionario_instance else "Novo Cadastro via Sistema RH"
@@ -60,7 +74,6 @@ def cadastro_funcionario(request):
         'form': form, 'resultados': resultados, 'termo_busca': termo_busca,
         'id_editar': id_editar, 'funcionario_editando': funcionario_instance, 'historico': historico
     })
-
 # --- FUNÇÕES DE CÁLCULO ---
 
 def calcular_inss_sobre_base(base_calculo):
@@ -304,13 +317,19 @@ def gerar_contracheque_pdf(request, funcionario_id):
 def gerar_cracha(request, funcionario_id):
     funcionario = get_object_or_404(Funcionario, pk=funcionario_id)
     
-    context = {'funcionario': funcionario}
+    # Define o caminho absoluto da logo para o PDF reconhecer
+    logo_path = os.path.join(settings.BASE_DIR, 'static', 'img', 'BS_Logo_Retangular.jpg')
+    
+    context = {
+        'funcionario': funcionario,
+        'logo_path': logo_path  # Enviamos o caminho para o template
+    }
+    
     html = render_to_string('human_resources/cracha_template.html', context)
     
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = f'attachment; filename="Cracha_{funcionario.nome_completo}.pdf"'
     
-    # Cria o PDF (Crachá tamanho padrão CR80: 85.6mm x 54mm)
     pisa.CreatePDF(html, dest=response)
     return response
 

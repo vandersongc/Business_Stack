@@ -13,54 +13,93 @@
     <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-4 justify-content-center">
         
         <div class="col">
-            <a href="{% url 'administrador' %}" class="module-card">
-                <img src="{% static 'img/pasta_adm.jpg' %}" alt="Ícone Admin">
-                <span>Administrador</span>
+            <a href="{% url 'administrador' %}" class="module-card text-decoration-none">
+                <div class="card h-100 shadow-sm hover-effect border-0">
+                    <div class="card-body text-center p-4">
+                        <img src="{% static 'img/pasta_adm.jpg' %}" alt="Administrador" class="img-fluid mb-3 rounded" style="max-height: 100px;">
+                        <h5 class="card-title text-dark">Administrador</h5>
+                    </div>
+                </div>
             </a>
         </div>
 
         <div class="col">
-            <a href="{% url 'financeiro' %}" class="module-card">
-                <img src="{% static 'img/pasta_financeiro.jpg' %}" alt="Ícone Financeiro">
-                <span>Financeiro</span>
+            <a href="{% url 'financeiro' %}" class="module-card text-decoration-none">
+                <div class="card h-100 shadow-sm hover-effect border-0">
+                    <div class="card-body text-center p-4">
+                        <img src="{% static 'img/pasta_financeiro.jpg' %}" alt="Financeiro" class="img-fluid mb-3 rounded" style="max-height: 100px;">
+                        <h5 class="card-title text-dark">Financeiro</h5>
+                    </div>
+                </div>
             </a>
         </div>
 
         <div class="col">
-            <a href="{% url 'pessoal' %}" class="module-card">
-                <img src="{% static 'img/pasta_pessoal.jpg' %}" alt="Ícone Pessoal">
-                <span>Pessoal</span>
+            <a href="{% url 'pessoal' %}" class="module-card text-decoration-none">
+                <div class="card h-100 shadow-sm hover-effect border-0">
+                    <div class="card-body text-center p-4">
+                        <img src="{% static 'img/pasta_pessoal.jpg' %}" alt="Pessoal" class="img-fluid mb-3 rounded" style="max-height: 100px;">
+                        <h5 class="card-title text-dark">Pessoal</h5>
+                    </div>
+                </div>
             </a>
         </div>
 
         <div class="col">
-            <a href="{% url 'suprimentos' %}" class="module-card">
-                <img src="{% static 'img/pasta_suprimentos.jpg' %}" alt="Ícone Suprimentos">
-                <span>Suprimentos</span>
+            <a href="{% url 'suprimentos' %}" class="module-card text-decoration-none">
+                <div class="card h-100 shadow-sm hover-effect border-0">
+                    <div class="card-body text-center p-4">
+                        <img src="{% static 'img/pasta_suprimentos.jpg' %}" alt="Suprimentos" class="img-fluid mb-3 rounded" style="max-height: 100px;">
+                        <h5 class="card-title text-dark">Suprimentos</h5>
+                    </div>
+                </div>
             </a>
         </div>
 
         <div class="col">
-            <a href="{% url 'contabilidade' %}" class="module-card">
-                <img src="{% static 'img/pasta_contabilidade.jpg' %}" alt="Ícone Contabilidade">
-                <span>Contabilidade</span>
+            <a href="{% url 'contabilidade' %}" class="module-card text-decoration-none">
+                <div class="card h-100 shadow-sm hover-effect border-0">
+                    <div class="card-body text-center p-4">
+                        <img src="{% static 'img/pasta_contabilidade.jpg' %}" alt="Contabilidade" class="img-fluid mb-3 rounded" style="max-height: 100px;">
+                        <h5 class="card-title text-dark">Contabilidade</h5>
+                    </div>
+                </div>
             </a>
         </div>
 
         <div class="col">
-            <a href="{% url 'logistica' %}" class="module-card">
-                <img src="{% static 'img/pasta_logistica.jpg' %}" alt="Ícone Logística">
-                <span>Logística</span>
+            <a href="{% url 'logistica' %}" class="module-card text-decoration-none">
+                <div class="card h-100 shadow-sm hover-effect border-0">
+                    <div class="card-body text-center p-4">
+                        <img src="{% static 'img/pasta_logistica.jpg' %}" alt="Logística" class="img-fluid mb-3 rounded" style="max-height: 100px;">
+                        <h5 class="card-title text-dark">Logística</h5>
+                    </div>
+                </div>
             </a>
         </div>
 
         <div class="col">
-            <a href="{% url 'auditoria' %}" class="module-card">
-                <img src="{% static 'img/pasta_auditoria.jpg' %}" alt="Ícone Auditoria">
-                <span>Auditoria</span>
+            <a href="{% url 'auditoria' %}" class="module-card text-decoration-none">
+                <div class="card h-100 shadow-sm hover-effect border-0">
+                    <div class="card-body text-center p-4">
+                        <img src="{% static 'img/pasta_auditoria.jpg' %}" alt="Auditoria" class="img-fluid mb-3 rounded" style="max-height: 100px;">
+                        <h5 class="card-title text-dark">Auditoria</h5>
+                    </div>
+                </div>
             </a>
         </div>
 
     </div>
 </div>
+
+<style>
+    /* Pequeno efeito ao passar o mouse para dar vida ao dashboard */
+    .hover-effect {
+        transition: transform 0.2s ease-in-out;
+    }
+    .hover-effect:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
+    }
+</style>
 {% endblock %}

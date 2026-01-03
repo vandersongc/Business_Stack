@@ -11,18 +11,28 @@ urlpatterns = [
     path('login/', home_views.login_view, name='login'),
     path('logout/', home_views.logout_view, name='logout'),
 
-    # RH
+    # === MÓDULO PESSOAL (RH) ===
+    # Menu Principal do RH
     path('pessoal/', rh_views.home_rh, name='pessoal'), 
-    path('cadastro_funcionarios/', rh_views.cadastro_funcionario, name='cadastro_funcionarios'),
-    path('folha_pagamento/', rh_views.folha_pagamento, name='folha_pagamento'),
-    path('exportar_folha/<str:formato>/', rh_views.exportar_folha, name='exportar_folha'),
+    
+    # Funcionalidades de Cadastro e Folha
+    path('pessoal/funcionarios/', rh_views.cadastro_funcionario, name='cadastro_funcionarios'),
+    path('pessoal/folha/', rh_views.folha_pagamento, name='folha_pagamento'),
+    path('pessoal/folha/exportar/<str:formato>/', rh_views.exportar_folha, name='exportar_folha'),
+    path('pessoal/folha/processar_faltas/', rh_views.processar_faltas_mensal, name='processar_faltas'),
     
     # Contracheque
-    path('contracheque/', rh_views.consulta_contracheque, name='consulta_contracheque'),
-    path('contracheque/visualizar/<int:funcionario_id>/', rh_views.visualizar_contracheque, name='visualizar_contracheque'),
-    path('contracheque/pdf/<int:funcionario_id>/', rh_views.gerar_contracheque_pdf, name='gerar_contracheque_pdf'),
+    path('pessoal/contracheque/', rh_views.consulta_contracheque, name='consulta_contracheque'),
+    path('pessoal/contracheque/visualizar/<int:funcionario_id>/', rh_views.visualizar_contracheque, name='visualizar_contracheque'),
+    path('pessoal/contracheque/pdf/<int:funcionario_id>/', rh_views.gerar_contracheque_pdf, name='gerar_contracheque_pdf'),
 
-    # Outros Módulos
+    # NOVAS FUNCIONALIDADES (Crachá e Ponto)
+    # Note que coloquei 'pessoal/' na frente para manter organizado
+    path('pessoal/cracha/<int:funcionario_id>/', rh_views.gerar_cracha, name='gerar_cracha'),
+    path('pessoal/ponto/painel/', rh_views.painel_ponto, name='painel_ponto'),
+    path('pessoal/api/registrar_ponto/', rh_views.registrar_ponto_api, name='registrar_ponto_api'),
+
+    # === OUTROS MÓDULOS (Temporários/Placeholders) ===
     path('administrador/', temp_views.administrador, name='administrador'),
     path('auditoria/', temp_views.auditoria, name='auditoria'),
     path('contabilidade/', temp_views.contabilidade, name='contabilidade'),

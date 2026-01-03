@@ -4,91 +4,134 @@
     <meta charset="UTF-8">
     <style>
         @page {
-            size: 54mm 85.6mm; /* Tamanho CR80 vertical */
-            margin: 0;
-        }
-        body {
-            font-family: Helvetica, sans-serif;
+            size: 54mm 85.6mm; /* Tamanho padrão de cartão CR80 */
             margin: 0;
             padding: 0;
-            text-align: center;
-            background-color: #f0f0f0;
         }
-        .cracha {
+        body {
+            font-family: Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #ffffff;
+            text-align: center;
+        }
+        .container {
             width: 100%;
             height: 100%;
-            border: 1px solid #ccc;
-            background: white;
+            border: 1px solid #ddd;
             position: relative;
         }
+        
+        /* --- CABEÇALHO COM LOGO --- */
         .header {
-            background-color: #1e293b; /* Mesma cor do seu sistema */
-            color: white;
-            padding: 10px 0;
-            margin-bottom: 10px;
+            width: 100%;
+            height: 60px; /* Altura reservada para a logo */
+            padding-top: 15px;
+            margin-bottom: 5px;
         }
-        .foto-container {
+        .logo-img {
+            width: 120px; /* Ajuste a largura da logo retangular */
+            height: auto;
+        }
+
+        /* --- FOTO --- */
+        .photo-area {
+            margin: 5px auto;
             width: 80px;
             height: 100px;
-            margin: 0 auto 10px auto;
-            border: 2px solid #38bdf8;
+            border: 2px solid #1e293b; /* Cor da borda */
+            border-radius: 4px;
             overflow: hidden;
+            background-color: #f0f0f0;
         }
-        .foto-container img {
+        .foto-img {
             width: 100%;
             height: 100%;
             object-fit: cover;
         }
+
+        /* --- DADOS DO COLABORADOR --- */
+        .info-area {
+            margin-top: 5px;
+            padding: 0 5px;
+        }
         .nome {
-            font-size: 14px;
+            font-size: 13px;
             font-weight: bold;
+            color: #000;
             text-transform: uppercase;
-            margin-bottom: 5px;
-            color: #333;
+            margin-bottom: 3px;
+            line-height: 1.1;
         }
         .cargo {
             font-size: 10px;
+            color: #444;
+            font-weight: normal;
+            margin-bottom: 2px;
+        }
+        .matricula {
+            font-size: 9px;
             color: #666;
-            margin-bottom: 15px;
+            margin-bottom: 5px;
         }
-        .qrcode {
-            width: 90px;
-            height: 90px;
-            margin: 0 auto;
+
+        /* --- QR CODE --- */
+        .qr-area {
+            margin-top: 5px;
+            text-align: center;
         }
-        .footer {
-            font-size: 8px;
+        .qr-img {
+            width: 60px;
+            height: 60px;
+        }
+
+        /* --- RODAPÉ DECORATIVO --- */
+        .footer-bar {
             position: absolute;
-            bottom: 5px;
+            bottom: 0;
             width: 100%;
-            color: #999;
+            height: 12px;
+            background-color: #1e293b; /* Azul escuro do sistema */
         }
     </style>
 </head>
 <body>
-    <div class="cracha">
+    <div class="container">
         <div class="header">
-            <strong>Business Stack</strong>
-        </div>
-        
-        <div class="foto-container">
-            {% if funcionario.foto %}
-                <img src="{{ funcionario.foto.path }}" alt="Foto">
+            {% if logo_path %}
+                <img src="{{ logo_path }}" class="logo-img">
             {% else %}
-                <div style="padding-top: 30px; font-size: 10px; color: #ccc;">Sem Foto</div>
+                <h3>BUSINESS STACK</h3>
             {% endif %}
         </div>
 
-        <div class="nome">{{ funcionario.nome_completo }}</div>
-        <div class="cargo">{{ funcionario.cargo }} | {{ funcionario.departamento }}</div>
+        <div class="photo-area">
+            {% if funcionario.foto %}
+                <img src="{{ funcionario.foto.path }}" class="foto-img">
+            {% else %}
+                <div style="font-size: 30px; color: #ccc; line-height: 100px;">👤</div>
+            {% endif %}
+        </div>
 
-        <div class="qrcode">
+        <div class="info-area">
+            <div class="nome">
+                {% if funcionario.nome_completo|length > 25 %}
+                    {{ funcionario.nome_completo|slice:":23" }}...
+                {% else %}
+                    {{ funcionario.nome_completo }}
+                {% endif %}
+            </div>
+            <div class="cargo">{{ funcionario.cargo }}</div>
+            <div class="matricula">Matrícula: <strong>{{ funcionario.id }}</strong></div>
+        </div>
+
+        <div class="qr-area">
             {% if funcionario.qr_code_img %}
-                <img src="{{ funcionario.qr_code_img.path }}" style="width: 100%;">
+                <img src="{{ funcionario.qr_code_img.path }}" class="qr-img">
             {% endif %}
         </div>
 
-        <div class="footer">ID: {{ funcionario.id }} | Validade: Indeterminada</div>
+        <div class="footer-bar"></div>
     </div>
 </body>
 </html>

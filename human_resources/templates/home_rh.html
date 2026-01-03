@@ -10,7 +10,8 @@
         <p class="lead text-muted">Gestão de Recursos Humanos</p>
     </div>
 
-    <div class="row row-cols-1 row-cols-md-3 g-4">
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+        
         <div class="col">
             <div class="card h-100 shadow-sm border-0">
                 <div class="card-body text-center">
@@ -35,11 +36,22 @@
             <div class="card h-100 shadow-sm border-0">
                 <div class="card-body text-center">
                     <h5 class="card-title text-primary">Contracheque</h5>
-                    <p class="card-text text-muted">Consulta e emissão de holerites individuais.</p>
+                    <p class="card-text text-muted">Consulta e emissão de holerites.</p>
                     <a href="{% url 'consulta_contracheque' %}" class="btn btn-outline-primary btn-sm rounded-pill">Acessar</a>
                 </div>
             </div>
         </div>
+
+        <div class="col">
+            <div class="card h-100 shadow-sm border-0">
+                <div class="card-body text-center">
+                    <h5 class="card-title text-primary">Registro de Ponto</h5>
+                    <p class="card-text text-muted">Leitor de QR Code para controle.</p>
+                    <a href="{% url 'painel_ponto' %}" class="btn btn-outline-primary btn-sm rounded-pill">Abrir Leitor</a>
+                </div>
+            </div>
+        </div>
+
     </div>
     
     <div class="text-center mt-5">

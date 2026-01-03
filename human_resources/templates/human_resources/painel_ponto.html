@@ -1,73 +1,210 @@
 {% extends 'base.html' %}
 
+{% block title %}Ponto Eletrônico | Business Stack{% endblock %}
+
 {% block content %}
-<div class="container py-5 text-center">
-    <h2 class="mb-4">Registro de Ponto</h2>
+<style>
+    /* Estilo Específico para o Quiosque */
+    .clock-container {
+        font-family: 'Courier New', monospace;
+        background-color: #212529;
+        color: #00ff88;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    }
+    .clock-time { font-size: 3.5rem; font-weight: bold; line-height: 1; }
+    .clock-date { font-size: 1.2rem; color: #adb5bd; }
     
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card shadow">
-                <div class="card-body">
+    .scanner-card {
+        border: none;
+        overflow: hidden;
+        border-radius: 15px;
+        background-color: #000;
+    }
+    
+    .log-list {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+    .log-item {
+        border-left: 4px solid #0d6efd;
+        background-color: #f8f9fa;
+        margin-bottom: 10px;
+        padding: 10px;
+        border-radius: 4px;
+        animation: slideIn 0.5s ease-out;
+    }
+    @keyframes slideIn {
+        from { transform: translateX(20px); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+</style>
+
+<div class="container-fluid py-4">
+    
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="page-title mb-0">Registro de Ponto</h2>
+        <a href="{% url 'pessoal' %}" class="btn btn-outline-secondary btn-sm rounded-pill">
+            <i class="bi bi-arrow-left me-1"></i> Voltar
+        </a>
+    </div>
+
+    <div class="row g-4">
+        
+        <div class="col-lg-7">
+            <div class="card shadow-lg scanner-card">
+                <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-qr-code-scan me-2"></i>Leitor Biométrico / QR</h5>
+                    <span class="badge bg-danger blink_me" id="status-badge">Aguardando...</span>
+                </div>
+                <div class="card-body p-0 bg-black">
                     <div id="reader" style="width: 100%;"></div>
-                    <div id="result" class="mt-3 alert alert-secondary" style="display: none;"></div>
+                </div>
+                <div class="card-footer bg-white text-center">
+                    <small class="text-muted">Posicione o QR Code do crachá frente à câmera</small>
                 </div>
             </div>
-            <p class="mt-3 text-muted">Aproxime o QR Code do Crachá na câmera</p>
+
+            <div id="result-area" class="mt-3"></div>
         </div>
+
+        <div class="col-lg-5">
+            <div class="clock-container text-center">
+                <div class="clock-time" id="digital-clock">00:00:00</div>
+                <div class="clock-date" id="date-display">Segunda, 01 de Janeiro</div>
+            </div>
+
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white border-bottom-0">
+                    <h5 class="mb-0 text-primary"><i class="bi bi-clock-history me-2"></i>Registros Recentes</h5>
+                </div>
+                <div class="card-body bg-light">
+                    <div id="log-container" class="log-list">
+                        <div class="text-center text-muted mt-5" id="empty-log-msg">
+                            <i class="bi bi-person-badge display-4"></i>
+                            <p class="mt-2">Nenhum registro nesta sessão.</p>
+                        </div>
+                        </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 </div>
 
 <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 
 <script>
+    // --- 1. RELÓGIO DIGITAL ---
+    function updateClock() {
+        const now = new Date();
+        const timeString = now.toLocaleTimeString('pt-BR');
+        const dateString = now.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
+        
+        document.getElementById('digital-clock').innerText = timeString;
+        document.getElementById('date-display').innerText = dateString;
+    }
+    setInterval(updateClock, 1000);
+    updateClock(); // Chama imediatamente
+
+    // --- 2. LOG DE REGISTROS ---
+    function addLog(nome, mensagem, status) {
+        const container = document.getElementById('log-container');
+        const emptyMsg = document.getElementById('empty-log-msg');
+        if(emptyMsg) emptyMsg.style.display = 'none';
+
+        const now = new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
+        
+        const colorClass = status === 'success' ? 'border-success' : 'border-warning';
+        const icon = status === 'success' ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-exclamation-triangle-fill text-warning"></i>';
+
+        const html = `
+            <div class="log-item shadow-sm bg-white ${colorClass}">
+                <div class="d-flex justify-content-between">
+                    <strong>${nome}</strong>
+                    <span class="text-muted small">${now}</span>
+                </div>
+                <div class="small mt-1">${icon} ${mensagem}</div>
+            </div>
+        `;
+        container.insertAdjacentHTML('afterbegin', html);
+    }
+
+    // --- 3. SCANNER QR CODE ---
     let isScanning = true;
 
     function onScanSuccess(decodedText, decodedResult) {
-        if (!isScanning) return; // Evita múltiplas leituras seguidas
+        if (!isScanning) return; 
 
         isScanning = false;
-        document.getElementById('result').style.display = 'block';
-        document.getElementById('result').className = 'alert alert-info';
-        document.getElementById('result').innerText = "Processando...";
+        const statusBadge = document.getElementById('status-badge');
+        statusBadge.innerText = "Processando...";
+        statusBadge.className = "badge bg-warning text-dark";
 
-        // Envia para o Backend
+        // Feedback Visual imediato
+        const resultArea = document.getElementById('result-area');
+        resultArea.innerHTML = '<div class="alert alert-info">Lendo dados... aguarde.</div>';
+
         fetch("{% url 'registrar_ponto_api' %}", {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ qr_content: decodedText })
         })
         .then(response => response.json())
         .then(data => {
-            const resDiv = document.getElementById('result');
-            resDiv.innerText = data.message;
             
+            // Toca som e mostra alerta
             if(data.status === 'success') {
-                resDiv.className = 'alert alert-success fw-bold';
-                // Toca um som de sucesso (opcional)
-                let audio = new Audio('https://actions.google.com/sounds/v1/cartoon/cartoon_boing.ogg');
-                audio.play();
+                resultArea.innerHTML = `<div class="alert alert-success fw-bold text-center"><h1>OK!</h1>${data.message}</div>`;
+                new Audio('https://actions.google.com/sounds/v1/cartoon/cartoon_boing.ogg').play();
+                statusBadge.innerText = "Sucesso";
+                statusBadge.className = "badge bg-success";
+                
+                addLog(data.funcionario, data.message, 'success');
+
             } else if (data.status === 'warning') {
-                resDiv.className = 'alert alert-warning';
+                resultArea.innerHTML = `<div class="alert alert-warning text-center">${data.message}</div>`;
+                statusBadge.innerText = "Atenção";
+                statusBadge.className = "badge bg-warning text-dark";
+                
+                // Tenta pegar o nome se vier na resposta, senão usa "Desconhecido"
+                addLog(data.funcionario || 'Usuário', data.message, 'warning');
+                
             } else {
-                resDiv.className = 'alert alert-danger';
+                resultArea.innerHTML = `<div class="alert alert-danger text-center">${data.message}</div>`;
+                new Audio('https://actions.google.com/sounds/v1/alerts/beep_short.ogg').play(); // Som de erro
+                statusBadge.innerText = "Erro";
+                statusBadge.className = "badge bg-danger";
             }
 
-            // Reativa o scanner após 3 segundos
+            // Reset após 3 segundos
             setTimeout(() => {
                 isScanning = true;
-                resDiv.style.display = 'none';
+                resultArea.innerHTML = '';
+                statusBadge.innerText = "Aguardando Leitura...";
+                statusBadge.className = "badge bg-danger blink_me";
             }, 3000);
         })
         .catch(error => {
             console.error('Error:', error);
             isScanning = true;
+            statusBadge.innerText = "Erro de Conexão";
         });
     }
 
+    // Configuração do Scanner
     let html5QrcodeScanner = new Html5QrcodeScanner(
-        "reader", { fps: 10, qrbox: 250 });
+        "reader", { fps: 10, qrbox: 250, aspectRatio: 1.0 });
     html5QrcodeScanner.render(onScanSuccess);
+
+    // Efeito de piscar no status
+    const style = document.createElement('style');
+    style.innerHTML = `
+        .blink_me { animation: blinker 1.5s linear infinite; }
+        @keyframes blinker { 50% { opacity: 0.5; } }
+    `;
+    document.head.appendChild(style);
 </script>
 {% endblock %}
